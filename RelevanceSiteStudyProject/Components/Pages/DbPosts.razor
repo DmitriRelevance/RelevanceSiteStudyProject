@@ -1,0 +1,53 @@
+﻿@using RelevanceSiteStudyProject.Data
+@using RelevanceSiteStudyProject.Services
+@inject IPostService _postService
+@page "/db-posts"
+
+<h1>Db Posts</h1>
+
+@if(@isLoading)
+{
+<p>Loading posts...</p>
+}
+else if(posts.Count == 0)
+{
+<p>No posts available.</p>
+}
+else
+{
+<ul class="list-group">
+    @foreach (var post in posts)
+    {
+        <li class="list-group-item">
+            <h5>@post.Title</h5>
+            <p>@post.Content</p>
+        </li>
+    }
+</ul>
+
+}
+
+@code {
+    private bool isLoading = true;
+
+    private List<Post> posts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isLoading = true;
+            posts = await _postService.GetPosts();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching posts: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+
+        StateHasChanged();
+    }
+}

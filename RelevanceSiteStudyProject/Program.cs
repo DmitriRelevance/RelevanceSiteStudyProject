@@ -1,5 +1,7 @@
 using RelevanceSiteStudyProject.Components;
+using RelevanceSiteStudyProject.Data;
 using RelevanceSiteStudyProject.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +15,22 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient<ApiService>();
 builder.Services.AddScoped<ApiService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=pizza.db"));
 
 var app = builder.Build();
+
+// Initialize the database
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using (var scope = scopeFactory.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    if (await db.Database.EnsureCreatedAsync())
+    {
+        await SeedData.InitializeAsync(db);
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
