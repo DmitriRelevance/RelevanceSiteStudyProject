@@ -1,0 +1,116 @@
+﻿@page "/pagination-posts"
+@rendermode InteractiveServer
+@inject ApiService ApiService
+
+<h3>Posts (Pagination)</h3>
+
+<!-- Search Bar -->
+<input class="form-control" type="text" placeholder="Search posts..." @bind="searchQuery" />
+
+<button class="btn btn-primary" @onclick="FetchPostsAsync" disabled="@isLoading">Load Posts</button>
+
+@if (isLoading)
+{
+    <p>Loading posts...</p>
+}
+else
+{
+    <ul class="list-unstyled">
+        @foreach (var post in posts)
+        {
+            <li class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">@post.Title</h5>
+                    <p class="card-text">@post.Body</p>
+                </div>
+            </li>
+        }
+    </ul>
+
+
+    <!-- Pagination Controls with Page Numbers -->
+    <div class="pagination">
+        <button class="btn btn-secondary" @onclick="() => ChangePageAsync(currentPage - 1)" disabled="@(!CanGoBack)">Previous</button>
+
+        @for (int i = 1; i <= totalPages; i++)
+        {
+            int p = i;
+
+            <button class="btn btn-secondary" @onclick="() => ChangePageAsync(p)" disabled="@(currentPage == p)">
+                @p
+            </button>
+        }
+
+        <span>Page @currentPage of @totalPages</span>
+
+        <button class="btn btn-secondary" @onclick="() => ChangePageAsync(currentPage + 1)" disabled="@(!CanGoForward)">Next</button>
+    </div>
+}
+
+@code {
+    private List<Post> posts = new List<Post>();
+    private bool isLoading = false;
+    int currentPage = 1;
+    private const int PageSize = 10;
+    private int totalPages = 1; //Base on the API response
+    private bool CanGoBack => currentPage > 1;
+    private bool CanGoForward => posts.Count == PageSize;
+    private string searchQuery = string.Empty;
+    private string lastSearchQuery = string.Empty;
+
+    private async Task FetchPostsAsync()
+    {
+        isLoading = true;
+        
+        if(!searchQuery.Equals(lastSearchQuery))
+        {
+            currentPage = 1; // Reset to first page if search query changes
+            lastSearchQuery = searchQuery;
+        }
+
+        await Task.Delay(2000);
+
+        var url = $"https://jsonplaceholder.typicode.com/posts?_page={currentPage}&_limit={PageSize}";
+
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            url += $"&q={searchQuery}";
+        }
+
+        posts = await ApiService.GetDataAsync<List<Post>>(url) ?? new List<Post>();
+
+        var totalItems = await ApiService.GetDataAsync<List<Post>>($"https://jsonplaceholder.typicode.com/posts?{(string.IsNullOrEmpty(searchQuery) ? string.Empty : $"q={searchQuery}&")}");
+        if (totalItems == null || totalItems.Count == 0)
+        {
+            totalItems = new List<Post>();
+        }
+        totalPages = (int)Math.Ceiling(totalItems.Count() / (double)PageSize);
+        currentPage = Math.Min(currentPage, totalPages); // Ensure current page does not exceed total pages
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+
+    private async Task ChangePageAsync(int newPage)
+    {
+        if (newPage < 1) return;
+        currentPage = newPage;
+        await FetchPostsAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            StateHasChanged();  // Force UI update
+        }
+    }
+
+    public class Post
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Body { get; set; } = string.Empty;
+    }
+}

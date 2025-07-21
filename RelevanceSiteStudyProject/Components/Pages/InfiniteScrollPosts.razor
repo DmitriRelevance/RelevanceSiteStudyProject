@@ -1,0 +1,117 @@
+﻿@page "/scroll-posts"
+@rendermode InteractiveServer
+@inject ApiService ApiService
+@inject IJSRuntime JS
+
+<h3>Posts (Infinite Scroll)</h3>
+
+<div id="scrollContainer" style="height: 500px; overflow-y: scroll;" @onscroll="OnScrollAsync">
+    <ul class="list-unstyled">
+        @foreach (var post in posts)
+        {
+            <li class="card mb-3 fade-in">
+                <div class="card-body">
+                    <h5 class="card-title">@post.Title</h5>
+                    <p class="card-text">@post.Body</p>
+                </div>
+            </li>
+        }
+    </ul>
+    @if (isLoading)
+    {
+        <p>Loading more posts...</p>
+    }
+</div>
+
+@code {
+    private List<Post> posts = new();
+    private int currentPage = 1;
+    private const int PageSize = 10;
+    private bool isLoading = false;
+    private bool hasMore = true;
+
+    private async Task LoadMorePosts()
+    {
+        if (isLoading || !hasMore)
+            return;
+
+        isLoading = true;
+        StateHasChanged();
+
+        await Task.Delay(1000); // simulate delay
+
+        var newPosts = await ApiService.GetDataAsync<List<Post>>(
+            $"https://jsonplaceholder.typicode.com/posts?_page={currentPage}&_limit={PageSize}") ?? new();
+
+        if (newPosts.Count == 0)
+        {
+            hasMore = false;
+        }
+        else
+        {
+            posts.AddRange(newPosts);
+            currentPage++;
+        }
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task OnScrollAsyncOld(EventArgs args)
+    {
+        var scrollTop = await JS.InvokeAsync<int>("eval", "document.getElementById('scrollContainer').scrollTop");
+        var scrollHeight = await JS.InvokeAsync<int>("eval", "document.getElementById('scrollContainer').scrollHeight");
+        var clientHeight = await JS.InvokeAsync<int>("eval", "document.getElementById('scrollContainer').clientHeight");
+
+        if (scrollTop + clientHeight >= scrollHeight - 100)
+        {
+            await LoadMorePosts();
+        }
+    }
+
+    private bool isScrolling = false;
+
+    private async Task OnScrollAsync()
+    {
+        if (isScrolling || isLoading || !hasMore)
+            return;
+
+        isScrolling = true;
+
+        try
+        {
+            var info = await JS.InvokeAsync<ScrollInfo>("scrollHelper.getScrollInfo", "scrollContainer");
+            if (info is null) return;
+
+            if (info.ScrollTop + info.ClientHeight >= info.ScrollHeight - 100)
+            {
+                await LoadMorePosts();
+            }
+        }
+        finally
+        {
+            isScrolling = false;
+        }
+    }
+
+
+    public class ScrollInfo
+    {
+        public int ScrollTop { get; set; }
+        public int ScrollHeight { get; set; }
+        public int ClientHeight { get; set; }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMorePosts();
+    }
+
+    public class Post
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Body { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,52 @@
+﻿@page "/contact"
+@using System.ComponentModel.DataAnnotations
+
+<h3>Contact Us</h3>
+
+<EditForm Model="@contactModel" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="contactModel.Name" />
+        <ValidationMessage For="@(() => contactModel.Name)" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="contactModel.Email" />
+        <ValidationMessage For="@(() => contactModel.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="message">Message</label>
+        <InputTextArea id="message" class="form-control" @bind-Value="contactModel.Message" />
+        <ValidationMessage For="@(() => contactModel.Message)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code {
+    private ContactModel contactModel = new ContactModel();
+
+    private void HandleSubmit()
+    {
+        // Handle form submission (e.g., send an email or save to database)
+        Console.WriteLine("Form submitted!");
+    }
+
+    public class ContactModel
+    {
+        [Required(ErrorMessage = "Name is required")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Message is required")]
+        public string Message { get; set; }
+    }
+}
