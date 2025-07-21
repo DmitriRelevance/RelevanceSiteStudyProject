@@ -15,7 +15,7 @@
             if (!context.Users.Any())
             {
                 context.Users.AddRange(
-                    new User { Id = 1, Username = "admin", Email = "admin@site.com" }
+                    new User { Id = 1, Name = "admin", Email = "admin@site.com" }
                     );
 
             }

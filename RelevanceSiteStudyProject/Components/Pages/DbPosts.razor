@@ -1,36 +1,62 @@
 ﻿@using RelevanceSiteStudyProject.Data
 @using RelevanceSiteStudyProject.Services
 @inject IPostService _postService
+@rendermode InteractiveServer
 @page "/db-posts"
 
 <h1>Db Posts</h1>
 
-@if(@isLoading)
+@if (currentUser == null)
 {
-<p>Loading posts...</p>
-}
-else if(posts.Count == 0)
-{
-<p>No posts available.</p>
+    <p>Please log in to continue.</p>
+    <button class="btn btn-primary" @onclick="LogInAsAdmin">Log In</button>
+    <button class="btn btn-primary" @onclick="LogInAsUser">Log In as Regular User</button>
+    <p>Regular user have access only for his posts.</p>
 }
 else
 {
-<ul class="list-group">
-    @foreach (var post in posts)
-    {
-        <li class="list-group-item">
-            <h5>@post.Title</h5>
-            <p>@post.Content</p>
-        </li>
-    }
-</ul>
+    <h2>Welcome, @currentUser.Name!</h2>
 
+    <div>
+        <h3>Create Post</h3>
+        <input type="text" placeholder="Title" @bind-value="newPostTitle" />
+        <input type="text" placeholder="Content" @bind-value="newPostContent" />
+        <button class="btn btn-primary" @onclick="CreatePost">Create Post</button>
+    </div>
+
+    <h3>Posts</h3>
+
+    @if (@isLoading)
+    {
+        <p>Loading posts...</p>
+    }
+    else if (posts.Count == 0)
+    {
+        <p>No posts available.</p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var post in posts)
+            {
+                <li class="list-group-item">
+                    <h5>@post.Title</h5>
+                    <p>@post.Content</p>
+                </li>
+            }
+        </ul>
+
+    }
 }
+
 
 @code {
     private bool isLoading = true;
-
     private List<Post> posts = new();
+    private User currentUser = null;
+
+    private string newPostTitle = string.Empty;
+    private string newPostContent = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,5 +75,51 @@ else
         }
 
         StateHasChanged();
+    }
+    private void LogInAsAdmin()
+    {
+        currentUser = new User { Id = 1, Name = "Admin", IsAdmin = true };
+        StateHasChanged();
+    }
+
+    private void LogInAsUser()
+    {
+        currentUser = new User { Id = 2, Name = "Regular User", IsAdmin = false };
+        StateHasChanged();
+    }
+
+    private async Task CreatePost(MouseEventArgs args)
+    {
+        if (!string.IsNullOrWhiteSpace(newPostTitle) && !string.IsNullOrWhiteSpace(newPostContent))
+        {
+            var newPost = new Post
+            {
+                Title = newPostTitle,
+                Content = newPostContent,
+                UserId = currentUser.Id
+            };
+            var addedPost = _postService.Add(newPost);
+            //Update the posts list with the new post
+            await _postService.GetPosts();
+
+            newPostTitle = string.Empty;
+            newPostContent = string.Empty;
+        }
+        else
+        {
+            Console.WriteLine("Title and content cannot be empty.");
+        }
+    }
+
+    private async Task DeletePost(Post post, User currentUser)
+    {
+        try
+        {
+            await _postService.Delele(post, currentUser);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting post: {ex.Message}");
+        }
     }
 }
