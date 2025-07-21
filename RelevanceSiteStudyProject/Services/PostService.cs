@@ -13,8 +13,16 @@ namespace RelevanceSiteStudyProject.Services
 
         public async Task<Post> Add(Post post)
         {
-            _context.Posts.Add(post);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Posts.Add(post);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+            }
+
             return post;
         }
         public async Task<List<Post>> GetPosts()
@@ -25,18 +33,21 @@ namespace RelevanceSiteStudyProject.Services
         {
             throw new NotImplementedException();
         }
-        public Task Delele(Post post, User currentUser)
+        public Task Delete(Post post, User currentUser)
         {
             var existingPost = _context.Posts.Find(post.Id);
             if (existingPost != null)
             {
-                if (currentUser == null || (existingPost.User.Id != currentUser.Id || currentUser.IsAdmin))
+                if (currentUser != null && (existingPost.User.Id == currentUser.Id || currentUser.IsAdmin))
+                {
+                    _context.Posts.Remove(existingPost);
+                    return _context.SaveChangesAsync();
+                }
+                else
                 {
                     throw new UnauthorizedAccessException("You do not have permission to delete this post.");
                 }
 
-                _context.Posts.Remove(existingPost);
-                return _context.SaveChangesAsync();
             }
             else
             {
@@ -50,6 +61,6 @@ namespace RelevanceSiteStudyProject.Services
         Task<Post> Add(Post post);
         Task<List<Post>> GetPosts();
         Task Update(Post post);
-        Task Delele(Post post, User currentUser);
+        Task Delete(Post post, User currentUser);
     }
 }
