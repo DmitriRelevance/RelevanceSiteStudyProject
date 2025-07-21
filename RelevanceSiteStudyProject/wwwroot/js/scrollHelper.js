@@ -7,9 +7,9 @@
         var scrollHeight = Math.round(el.scrollHeight);
         var clientHeight = Math.round(el.clientHeight);
 
-        console.log("scrollTop" + scrollTop)
-        console.log("scrollHeight" + scrollHeight)
-        console.log("clientHeight" + clientHeight)
+        //console.log("scrollTop" + scrollTop)
+        //console.log("scrollHeight" + scrollHeight)
+        //console.log("clientHeight" + clientHeight)
 
         return {
             scrollTop: scrollTop,
