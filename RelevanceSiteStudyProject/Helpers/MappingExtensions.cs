@@ -29,7 +29,7 @@ namespace RelevanceSiteStudyProject.Helpers
             {
                 Id = user.Id,
                 Name = user.Name,
-                Email = user.Email,
+                Email = user.Email ?? string.Empty,
                 IsAdmin = user.IsAdmin,
             };
         }

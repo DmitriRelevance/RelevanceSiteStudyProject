@@ -1,8 +1,14 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Identity
+@using RelevanceSiteStudyProject.Core.Entities
 @using RelevanceSiteStudyProject.Interfaces
 @using RelevanceSiteStudyProject.Helpers
 @using RelevanceSiteStudyProject.Services
 @using RelevanceSiteStudyProject.ViewModels
+@inject SignInManager<Data.User> SignInManager
+@inject UserManager<Data.User> UserManager
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor HttpContextAccessor
 
 @inject IPostService _postService
 @inject ILogger<DbPosts> _logger
@@ -11,7 +17,7 @@
 
 <h1>Db Posts</h1>
 
-@if(statusMessage.HasValue)
+@if (statusMessage.HasValue)
 {
     <div class="alert alert-@(statusMessage.Value.IsSuccess ? "sucess" : "danger")" role="alert">
         <strong>@(statusMessage.Value.IsSuccess ? "Success!" : "Error!")</strong>
@@ -19,7 +25,7 @@
     </div>
 }
 
-@if (currentUser == null)
+@* @if (currentUser == null)
 {
     <p>Please log in to continue.</p>
     <button class="btn btn-primary" @onclick="LogInAsAdmin">Log In as Admin</button>
@@ -27,6 +33,8 @@
     <p>Regular user have access only for his posts.</p>
 }
 else
+{ *@
+@if (currentUser is not null)
 {
     <h2>Welcome, @currentUser.Name!</h2>
 
@@ -66,7 +74,7 @@ else
             <li class="list-group-item">
                 <h5>@post.Title</h5>
                 <p>@post.Content</p>
-                @if (currentUser != null && (currentUser.IsAdmin || post.UserId == currentUser.Id))
+                @if (currentUser != null && (currentUser.IsAdmin || post.UserId.Equals(currentUser.Id)))
                 {
                     <button class="btn btn-secondary" @onclick="() => EditPost(post)">Edit</button>
                     <button class="btn btn-danger" @onclick="() => DeletePost(post)">Delete</button>
@@ -101,29 +109,46 @@ else
 @code {
     private bool isLoading = true;
     private IList<Post> posts = new List<Post>();
-    private User? currentUser;
+    private Data.User? currentUser;
     private Post postModel = new();
     private bool isEditing = false;
     private Post? postToEdit = null;
     private (bool IsSuccess, string Message)? statusMessage;
 
-
     protected override async Task OnInitializedAsync()
     {
-        await GetPosts();
+        var user = HttpContextAccessor.HttpContext?.User;
+        if (user is not null)
+        {
+            currentUser = await UserManager.GetUserAsync(user);
+        }
     }
 
-    private void LogInAsAdmin()
+    protected override async Task OnAfterRenderAsync (bool firstRender)
     {
-        currentUser = new User { Id = 1, Name = "Admin", IsAdmin = true };
-        StateHasChanged();
+        // if (firstRender && currentUser is null)
+        // {
+        //     //Avoid redirecting because of issue ith Logi
+        //     //Navigation.NavigateTo("/login", true);
+        // }
+        
+        if(firstRender)
+        {
+            await GetPosts();
+        }
     }
 
-    private void LogInAsUser()
-    {
-        currentUser = new User { Id = 2, Name = "Regular User", IsAdmin = false };
-        StateHasChanged();
-    }
+    // private void LogInAsAdmin()
+    // {
+    //     currentUser = new User { Id = 1, Name = "Admin", IsAdmin = true };
+    //     StateHasChanged();
+    // }
+
+    // private void LogInAsUser()
+    // {
+    //     currentUser = new User { Id = 2, Name = "Regular User", IsAdmin = false };
+    //     StateHasChanged();
+    // }
 
     private async Task CreatePost()
     {
@@ -222,6 +247,9 @@ else
     {
         try
         {
+            if(currentUser is null)
+                throw new InvalidOperationException("User must be logged in to delete a post.");
+
             await _postService.Delete(post, currentUser);
             statusMessage = (true, "Post deleted successfully.");
         }

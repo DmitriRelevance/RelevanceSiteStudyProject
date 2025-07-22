@@ -1,9 +1,66 @@
-﻿namespace RelevanceSiteStudyProject.Data
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace RelevanceSiteStudyProject.Data
 {
     public static class SeedData
     {
-        public static Task InitializeAsync(AppDbContext context)
+        public static async Task InitializeAsync(AppDbContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                var role = new IdentityRole("Admin");
+                await roleManager.CreateAsync(role);
+            }
+
+            if (!await roleManager.RoleExistsAsync("RegularUser"))
+            {
+                var role = new IdentityRole("RegularUser");
+                await roleManager.CreateAsync(role);
+            }
+
+            //Seed admin user
+            if (await userManager.FindByNameAsync("admin") is null)
+            {
+                var adminUser = new User
+                {
+                    UserName = "admin",
+                    Email = "admin@site.com",
+                    Name = "Admin User",
+                    IsAdmin = true,
+                };
+                var result = await userManager.CreateAsync(adminUser, "AdminPassword123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+            }
+
+            //Seed regular user
+            if (await userManager.FindByNameAsync("user") is null)
+            {
+                var regularUser = new User
+                {
+                    UserName = "user",
+                    Email = "firstUser@site.com",
+                    Name = "Regular User",
+                    IsAdmin = false,
+                };
+
+                var result = await userManager.CreateAsync(regularUser, "UserPassword123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(regularUser, "RegularUser");
+                }
+            }
+
+            var adminUserInfo = await userManager.Users.FirstOrDefaultAsync(u => u.IsAdmin);
+            if (adminUserInfo is null)
+                throw new NullReferenceException();
+            var regularUserInfo = await userManager.Users.FirstOrDefaultAsync(u => !u.IsAdmin);
+            if (regularUserInfo is null)
+                throw new NullReferenceException();
+
             if (!context.Categories.Any())
             {
                 context.Categories.AddRange(
@@ -12,14 +69,7 @@
                     new Category { Id = 3, Name = "Lifestyle" }
                 );
             }
-            if (!context.Users.Any())
-            {
-                context.Users.AddRange(
-                    new User { Id = 1, Name = "admin", Email = "admin@site.com" },
-                    new User { Id = 2, Name = "regular", Email = "regular@site.com"}
-                    );
 
-            }
 
             if (!context.Posts.Any())
             {
@@ -29,19 +79,19 @@
                         Title = "First Post",
                         Content = "This is the content of the first post.",
                         CategoryId = 1,
-                        UserId = 1
+                        UserId = adminUserInfo.Id
                     },
                     new Post
                     {
                         Title = "Second Post",
                         Content = "This is the content of the second post.",
                         CategoryId = 2,
-                        UserId = 1
+                        UserId = regularUserInfo.Id
                     }
                 );
             }
 
-            return context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
     }
 }

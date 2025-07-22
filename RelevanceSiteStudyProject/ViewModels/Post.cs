@@ -14,7 +14,7 @@ namespace RelevanceSiteStudyProject.ViewModels
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         // Navigation properties
-        public int UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
         public User User { get; set; } = null!;
         // Foreign key for the category
         public int CategoryId { get; set; }

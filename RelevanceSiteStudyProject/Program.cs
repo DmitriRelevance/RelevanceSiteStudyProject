@@ -1,12 +1,15 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RelevanceSiteStudyProject.Components;
 using RelevanceSiteStudyProject.Data;
-using RelevanceSiteStudyProject.Services;
-using Microsoft.EntityFrameworkCore;
 using RelevanceSiteStudyProject.Interfaces;
+using RelevanceSiteStudyProject.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddCircuitOptions(options =>
@@ -18,7 +21,20 @@ builder.Services.AddHttpClient<ApiService>();
 builder.Services.AddScoped<ApiService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=pizza.db"));
+    options.UseSqlite("Data Source=posts.db"));
+
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";  // Redirect to login page if not authenticated
+        options.LogoutPath = "/Account/Logout";  // Redirect after logout
+    });
+
+
 builder.Services.AddLogging(config =>
 {
     config.AddConsole();
@@ -28,17 +44,6 @@ builder.Services.AddLogging(config =>
 
 var app = builder.Build();
 
-// Initialize the database
-var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
-using (var scope = scopeFactory.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    if (await db.Database.EnsureCreatedAsync())
-    {
-        await SeedData.InitializeAsync(db);
-    }
-}
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -46,6 +51,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
@@ -55,5 +63,18 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Initialize the database
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using (var scope = scopeFactory.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    if (await db.Database.EnsureCreatedAsync())
+    {
+        await SeedData.InitializeAsync(db, userManager, roleManager);
+    }
+}
 
 app.Run();

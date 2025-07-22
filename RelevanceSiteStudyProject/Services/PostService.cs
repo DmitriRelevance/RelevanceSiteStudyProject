@@ -45,7 +45,7 @@ namespace RelevanceSiteStudyProject.Services
             var dbPosts = await _context.Posts.ToListAsync();
             return MappingExtensions.ToViewModel<Data.Post, Post>(dbPosts, MappingExtensions.ToViewModel);
         }
-        public async Task Update(Post post, User currentUser)
+        public async Task Update(Post post, Data.User currentUser)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace RelevanceSiteStudyProject.Services
                 if (existingPost is null)
                     throw new KeyNotFoundException("Couldn't find your post!");
 
-                if (currentUser != null && (currentUser.IsAdmin || existingPost.UserId == currentUser.Id))
+                if (currentUser != null && (currentUser.IsAdmin || existingPost.UserId.Equals(currentUser.Id)))
                 {
                     existingPost.Title = post.Title;
                     existingPost.Content = post.Content;
@@ -79,7 +79,7 @@ namespace RelevanceSiteStudyProject.Services
                 throw;
             }
         }
-        public async Task Delete(Post post, User currentUser)
+        public async Task Delete(Post post, Data.User currentUser)
         {
             var existingPost = await _context.Posts.FindAsync(post.Id);
             if (existingPost is null)
@@ -87,7 +87,7 @@ namespace RelevanceSiteStudyProject.Services
                 throw new KeyNotFoundException("Post not found");
             }
 
-            if (currentUser != null && (existingPost.UserId == currentUser.Id || currentUser.IsAdmin))
+            if (currentUser != null && (existingPost.UserId.Equals(currentUser.Id) || currentUser.IsAdmin))
             {
                 _context.Posts.Remove(existingPost);
                 await _context.SaveChangesAsync();
