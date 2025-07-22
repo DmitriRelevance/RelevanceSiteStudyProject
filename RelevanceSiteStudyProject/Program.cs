@@ -19,6 +19,12 @@ builder.Services.AddScoped<ApiService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=pizza.db"));
+builder.Services.AddLogging(config =>
+{
+    config.AddConsole();
+    config.AddDebug();
+    config.SetMinimumLevel(LogLevel.Information);
+});
 
 var app = builder.Build();
 

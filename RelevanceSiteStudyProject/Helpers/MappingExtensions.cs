@@ -9,7 +9,7 @@ namespace RelevanceSiteStudyProject.Helpers
         {
             if (user == null)
             {
-                return new Data.User();
+                return new();
             }
             return new Data.User
             {
@@ -23,7 +23,7 @@ namespace RelevanceSiteStudyProject.Helpers
         {
             if (user == null)
             {
-                return new User();
+                return new();
             }
             return new User
             {
@@ -37,7 +37,7 @@ namespace RelevanceSiteStudyProject.Helpers
         {
             if (category == null)
             {
-               return new Data.Category();
+                return new Data.Category();
             }
             return new Data.Category
             {
@@ -71,16 +71,16 @@ namespace RelevanceSiteStudyProject.Helpers
                 CreatedAt = post.CreatedAt,
                 UpdatedAt = post.UpdatedAt,
                 UserId = post.UserId,
-                User = ToDataModel(post.User),
+                //User = ToDataModel(post.User),
                 CategoryId = post.CategoryId,
-                Category = ToDataModel(post.Category)
+                //Category = ToDataModel(post.Category)
             };
         }
         public static Post ToViewModel(Data.Post post)
         {
             if (post == null)
             {
-               return new Post();
+                return new Post();
             }
             return new Post
             {
@@ -90,23 +90,23 @@ namespace RelevanceSiteStudyProject.Helpers
                 CreatedAt = post.CreatedAt,
                 UpdatedAt = post.UpdatedAt,
                 UserId = post.UserId,
-                User = ToViewModel(post.User),
+                //User = ToViewModel(post.User),
                 CategoryId = post.CategoryId,
-                Category = ToViewModel(post.Category)
+                //Category = ToViewModel(post.Category)
             };
         }
 
         public static IList<TOutput> ToDataModel<TInput, TOutput>(
             IList<TInput> input,
             Func<TInput, TOutput> mapFunc)
-            where TOutput : class 
+            where TOutput : class
             where TInput : class
         {
             if (input == null)
             {
                 throw new ArgumentNullException(nameof(input), "Posts cannot be null.");
             }
-            if(mapFunc == null)
+            if (mapFunc == null)
             {
                 throw new ArgumentNullException(nameof(mapFunc), "Mapping function cannot be null.");
             }
@@ -117,14 +117,14 @@ namespace RelevanceSiteStudyProject.Helpers
         public static IList<TOutput> ToViewModel<TInput, TOutput>(
             IList<TInput> input,
             Func<TInput, TOutput> mapFunc)
-            where TInput : class 
+            where TInput : class
             where TOutput : class
         {
             if (input == null)
             {
                 throw new ArgumentNullException(nameof(input), "Posts cannot be null.");
             }
-            if(mapFunc == null)
+            if (mapFunc == null)
             {
                 throw new ArgumentNullException(nameof(mapFunc), "Mapping function cannot be null.");
             }

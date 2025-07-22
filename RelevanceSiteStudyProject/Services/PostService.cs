@@ -8,10 +8,12 @@ namespace RelevanceSiteStudyProject.Services
     public class PostService : IPostService
     {
         private readonly Data.AppDbContext _context;
+        private readonly ILogger<PostService> _logger;
 
-        public PostService(Data.AppDbContext context)
+        public PostService(Data.AppDbContext context, ILogger<PostService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<Post> Add(Post post)
@@ -26,7 +28,14 @@ namespace RelevanceSiteStudyProject.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error adding post: {ex.Message}");
+                _logger.LogError($"Error adding post: {ex.Message}");
+                _context.LogEntries.Add(new Data.LogEntry
+                {
+                    Message = $"Error adding post: {ex.Message}",
+                    StackTrace = ex?.StackTrace ?? string.Empty,
+                    Timestamp = DateTime.UtcNow,
+                    Action = nameof(Add),
+                });
                 throw;
             }
 
@@ -59,7 +68,14 @@ namespace RelevanceSiteStudyProject.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during {nameof(Update)} the post: {ex.Message}");
+                _logger.LogError($"Error during {nameof(Update)} the post: {ex.Message}");
+                _context.LogEntries.Add(new Data.LogEntry
+                {
+                    Message = $"Error adding post: {ex.Message}",
+                    StackTrace = ex?.StackTrace ?? string.Empty,
+                    Timestamp = DateTime.UtcNow,
+                    Action = nameof(Update),
+                });
                 throw;
             }
         }
@@ -71,7 +87,7 @@ namespace RelevanceSiteStudyProject.Services
                 throw new KeyNotFoundException("Post not found");
             }
 
-            if (currentUser != null && (existingPost.User.Id == currentUser.Id || currentUser.IsAdmin))
+            if (currentUser != null && (existingPost.UserId == currentUser.Id || currentUser.IsAdmin))
             {
                 _context.Posts.Remove(existingPost);
                 await _context.SaveChangesAsync();

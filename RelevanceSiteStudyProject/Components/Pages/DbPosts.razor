@@ -5,10 +5,19 @@
 @using RelevanceSiteStudyProject.ViewModels
 
 @inject IPostService _postService
+@inject ILogger<DbPosts> _logger
 @rendermode InteractiveServer
 @page "/db-posts"
 
 <h1>Db Posts</h1>
+
+@if(statusMessage.HasValue)
+{
+    <div class="alert alert-@(statusMessage.Value.IsSuccess ? "sucess" : "danger")" role="alert">
+        <strong>@(statusMessage.Value.IsSuccess ? "Success!" : "Error!")</strong>
+        @statusMessage.Value.Message
+    </div>
+}
 
 @if (currentUser == null)
 {
@@ -96,6 +105,7 @@ else
     private Post postModel = new();
     private bool isEditing = false;
     private Post? postToEdit = null;
+    private (bool IsSuccess, string Message)? statusMessage;
 
 
     protected override async Task OnInitializedAsync()
@@ -124,12 +134,13 @@ else
             Title = postModel.Title,
             Content = postModel.Content,
             UserId = currentUser.Id,
-            CategoryId = 1,
+            CategoryId = 1
         };
         var addedPost = _postService.Add(newPost);
         //Update the posts list with the new post
         await GetPosts();
         postModel = new Post();
+        statusMessage = (true, "Successfully added a post!");
     }
 
     /// <summary>
@@ -142,10 +153,13 @@ else
         {
             isLoading = true;
             posts = await _postService.GetPosts();
+            _logger.LogInformation($"Loaded {posts.Count} posts.");
+            //statusMessage = (true, "Posts loaded successfully.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading posts: {ex.Message}");
+            _logger.LogError($"Error loading posts: {ex.Message}");
+            statusMessage = (false, "Failed to create post. Please try again.");
         }
         finally
         {
@@ -188,11 +202,12 @@ else
             await GetPosts();
             isEditing = false;
             postToEdit = null;
+            statusMessage = (true, "Post updated successfully.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error updating post: {ex.Message}");
-            throw;
+            _logger.LogError($"Error updating post: {ex.Message}");
+            statusMessage = (false, "Failed to update post. Please try again.");
         }
     }
 
@@ -208,10 +223,14 @@ else
         try
         {
             await _postService.Delete(post, currentUser);
+            statusMessage = (true, "Post deleted successfully.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error deleting post: {ex.Message}");
+            _logger.LogError($"Error deleting post: {ex.Message}");
+            statusMessage = (false, "Failed to delete post. Please try again.");
         }
+
+        StateHasChanged();
     }
 }
