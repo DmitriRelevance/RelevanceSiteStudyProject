@@ -1,5 +1,9 @@
-﻿@using RelevanceSiteStudyProject.Data
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using RelevanceSiteStudyProject.Interfaces
+@using RelevanceSiteStudyProject.Helpers
 @using RelevanceSiteStudyProject.Services
+@using RelevanceSiteStudyProject.ViewModels
+
 @inject IPostService _postService
 @rendermode InteractiveServer
 @page "/db-posts"
@@ -21,7 +25,7 @@ else
         <DataAnnotationsValidator />
         <ValidationSummary />
         <div>
-            <h3>Create Post</h3>
+            <h3>Write a new post</h3>
             <div>
                 <label for="postTitle">Title</label>
                 <InputText id="postTitle" class="form-control" @bind-Value="postModel.Title" placeHolder="Title"></InputText>
@@ -53,6 +57,32 @@ else
             <li class="list-group-item">
                 <h5>@post.Title</h5>
                 <p>@post.Content</p>
+                @if (currentUser != null && (currentUser.IsAdmin || post.UserId == currentUser.Id))
+                {
+                    <button class="btn btn-secondary" @onclick="() => EditPost(post)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => DeletePost(post)">Delete</button>
+
+                    @if (isEditing && postToEdit?.Id == post.Id)
+                    {
+                        <EditForm Model="@postToEdit" OnValidSubmit="SaveEdit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+                            <div>
+                                <h3>Edit Post</h3>
+                                <div>
+                                    <label for="postTitle">Title</label>
+                                    <InputText id="postTitle" class="form-control" @bind-Value="postToEdit.Title" placeHolder="@postToEdit.Title"></InputText>
+                                </div>
+                                <div>
+                                    <label for="postContent">Content</label>
+                                    <InputTextArea id="postContent" class="form-control" @bind-Value="postToEdit.Content" placeHolder="@postToEdit.Content"></InputTextArea>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-2">Save changes</button>
+                                <button class="btn btn-secondary mt-2" @onclick="() => isEditing = false">Cancel</button>
+                            </div>
+                        </EditForm>
+                    }
+                }
             </li>
         }
     </ul>
@@ -61,11 +91,52 @@ else
 
 @code {
     private bool isLoading = true;
-    private List<Post> posts = new();
+    private IList<Post> posts = new List<Post>();
     private User? currentUser;
-    private Post postModel = new Post();
+    private Post postModel = new();
+    private bool isEditing = false;
+    private Post? postToEdit = null;
+
 
     protected override async Task OnInitializedAsync()
+    {
+        await GetPosts();
+    }
+
+    private void LogInAsAdmin()
+    {
+        currentUser = new User { Id = 1, Name = "Admin", IsAdmin = true };
+        StateHasChanged();
+    }
+
+    private void LogInAsUser()
+    {
+        currentUser = new User { Id = 2, Name = "Regular User", IsAdmin = false };
+        StateHasChanged();
+    }
+
+    private async Task CreatePost()
+    {
+        if (currentUser == null) return;
+
+        var newPost = new Post
+        {
+            Title = postModel.Title,
+            Content = postModel.Content,
+            UserId = currentUser.Id,
+            CategoryId = 1,
+        };
+        var addedPost = _postService.Add(newPost);
+        //Update the posts list with the new post
+        await GetPosts();
+        postModel = new Post();
+    }
+
+    /// <summary>
+    /// Refresh the posts list after editing
+    /// </summary>
+    /// <returns></returns>
+    private async Task GetPosts()
     {
         try
         {
@@ -83,41 +154,56 @@ else
         }
     }
 
-    private void LogInAsAdmin()
+    private async Task EditPost(Post post)
     {
-        currentUser = new User { Id = 1, Name = "Admin", IsAdmin = true };
-        StateHasChanged();
-    }
-
-    private void LogInAsUser()
-    {
-        currentUser = new User { Id = 2, Name = "Regular User", IsAdmin = false };
-        StateHasChanged();
-    }
-
-    private async Task CreatePost()
-    {
-        if (currentUser == null)
+        if (currentUser == null || (!currentUser.IsAdmin && post.UserId != currentUser.Id))
         {
-            Console.WriteLine("You must be logged in to create a post.");
+            return; // Only allow editing if the user is an admin or the post belongs to the user
+        }
+
+        isEditing = true;
+
+        postToEdit = new Post
+        {
+            Id = post.Id,
+            Title = post.Title,
+            Content = post.Content,
+            UserId = post.UserId,
+            CategoryId = post.CategoryId
+        };
+
+        StateHasChanged();
+    }
+
+    private async Task SaveEdit()
+    {
+        if (currentUser is null || postToEdit is null)
+        {
             return;
         }
 
-        var newPost = new Post
+        try
         {
-            Title = postModel.Title,
-            Content = postModel.Content,
-            UserId = currentUser.Id,
-            CategoryId = 1,
-        };
-        var addedPost = _postService.Add(newPost);
-        //Update the posts list with the new post
-        posts = await _postService.GetPosts();
-        postModel = new Post();
-
+            await _postService.Update(postToEdit, currentUser);
+            await GetPosts();
+            isEditing = false;
+            postToEdit = null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating post: {ex.Message}");
+            throw;
+        }
     }
 
-    private async Task DeletePost(Post post, User currentUser)
+    private async Task CancelEdit()
+    {
+        isEditing = false;
+        postToEdit = null;
+        StateHasChanged();
+    }
+
+    private async Task DeletePost(Post post)
     {
         try
         {

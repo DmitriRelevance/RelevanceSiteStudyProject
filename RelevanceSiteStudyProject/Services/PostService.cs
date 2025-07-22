@@ -1,12 +1,15 @@
-﻿using RelevanceSiteStudyProject.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using RelevanceSiteStudyProject.Interfaces;
+using RelevanceSiteStudyProject.Helpers;
+using RelevanceSiteStudyProject.ViewModels;
 
 namespace RelevanceSiteStudyProject.Services
 {
     public class PostService : IPostService
     {
-        private readonly AppDbContext _context;
+        private readonly Data.AppDbContext _context;
 
-        public PostService(AppDbContext context)
+        public PostService(Data.AppDbContext context)
         {
             _context = context;
         }
@@ -15,52 +18,68 @@ namespace RelevanceSiteStudyProject.Services
         {
             try
             {
-                _context.Posts.Add(post);
+                var mappedPost = MappingExtensions.ToDataModel(post);
+
+                _context.Posts.Add(mappedPost);
                 await _context.SaveChangesAsync();
+                return post;
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine($"Error adding post: {ex.Message}");
+                throw;
             }
 
-            return post;
         }
-        public async Task<List<Post>> GetPosts()
+        public async Task<IList<Post>> GetPosts()
         {
-            return _context.Posts.ToList();
+            var dbPosts = await _context.Posts.ToListAsync();
+            return MappingExtensions.ToViewModel<Data.Post, Post>(dbPosts, MappingExtensions.ToViewModel);
         }
-        public Task Update(Post post)
+        public async Task Update(Post post, User currentUser)
         {
-            throw new NotImplementedException();
-        }
-        public Task Delete(Post post, User currentUser)
-        {
-            var existingPost = _context.Posts.Find(post.Id);
-            if (existingPost != null)
+            try
             {
-                if (currentUser != null && (existingPost.User.Id == currentUser.Id || currentUser.IsAdmin))
+                var existingPost = _context.Posts.FirstOrDefault(p => p.Id == post.Id);
+                if (existingPost is null)
+                    throw new KeyNotFoundException("Couldn't find your post!");
+
+                if (currentUser != null && (currentUser.IsAdmin || existingPost.UserId == currentUser.Id))
                 {
-                    _context.Posts.Remove(existingPost);
-                    return _context.SaveChangesAsync();
+                    existingPost.Title = post.Title;
+                    existingPost.Content = post.Content;
+                    await _context.SaveChangesAsync();
                 }
                 else
                 {
-                    throw new UnauthorizedAccessException("You do not have permission to delete this post.");
+                    throw new UnauthorizedAccessException("You do not have permission to edit this post.");
                 }
 
+                return;
             }
-            else
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during {nameof(Update)} the post: {ex.Message}");
+                throw;
+            }
+        }
+        public async Task Delete(Post post, User currentUser)
+        {
+            var existingPost = await _context.Posts.FindAsync(post.Id);
+            if (existingPost is null)
             {
                 throw new KeyNotFoundException("Post not found");
             }
-        }
-    }
 
-    public interface IPostService
-    {
-        Task<Post> Add(Post post);
-        Task<List<Post>> GetPosts();
-        Task Update(Post post);
-        Task Delete(Post post, User currentUser);
+            if (currentUser != null && (existingPost.User.Id == currentUser.Id || currentUser.IsAdmin))
+            {
+                _context.Posts.Remove(existingPost);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new UnauthorizedAccessException("You do not have permission to delete this post.");
+            }
+        }
     }
 }

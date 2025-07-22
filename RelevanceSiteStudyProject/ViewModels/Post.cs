@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RelevanceSiteStudyProject.Data
+namespace RelevanceSiteStudyProject.ViewModels
 {
     public class Post
     {
@@ -20,4 +20,6 @@ namespace RelevanceSiteStudyProject.Data
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
     }
+
+
 }

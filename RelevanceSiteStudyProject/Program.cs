@@ -2,6 +2,7 @@ using RelevanceSiteStudyProject.Components;
 using RelevanceSiteStudyProject.Data;
 using RelevanceSiteStudyProject.Services;
 using Microsoft.EntityFrameworkCore;
+using RelevanceSiteStudyProject.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

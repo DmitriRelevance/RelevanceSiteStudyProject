@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RelevanceSiteStudyProject.Data;
 
 namespace RelevanceSiteStudyProject.Data
 {
@@ -9,8 +10,9 @@ namespace RelevanceSiteStudyProject.Data
         {
         }
         public DbSet<Post> Posts { get; set; } = null!;
-        public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Category> Categories { get; set; } = null!;
+        public DbSet<LogEntry> LogEntries { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Post>()

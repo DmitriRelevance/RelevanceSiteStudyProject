@@ -2,7 +2,7 @@
 {
     public static class SeedData
     {
-        internal static Task InitializeAsync(AppDbContext context)
+        public static Task InitializeAsync(AppDbContext context)
         {
             if (!context.Categories.Any())
             {
@@ -15,7 +15,8 @@
             if (!context.Users.Any())
             {
                 context.Users.AddRange(
-                    new User { Id = 1, Name = "admin", Email = "admin@site.com" }
+                    new User { Id = 1, Name = "admin", Email = "admin@site.com" },
+                    new User { Id = 2, Name = "regular", Email = "regular@site.com"}
                     );
 
             }
