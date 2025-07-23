@@ -25,15 +25,6 @@
     </div>
 }
 
-@* @if (currentUser == null)
-{
-    <p>Please log in to continue.</p>
-    <button class="btn btn-primary" @onclick="LogInAsAdmin">Log In as Admin</button>
-    <button class="btn btn-primary" @onclick="LogInAsUser">Log In as Regular User</button>
-    <p>Regular user have access only for his posts.</p>
-}
-else
-{ *@
 @if (currentUser is not null)
 {
     <h2>Welcome, @currentUser.Name!</h2>
@@ -124,10 +115,10 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && currentUser is null)
-        {
-            Navigation.NavigateTo("/login", true);
-        }
+        // if (firstRender && currentUser is null)
+        // {
+        //     Navigation.NavigateTo("/login", true);
+        // }
 
         if (firstRender)
         {
@@ -151,18 +142,6 @@ else
             currentUser = await UserManager.GetUserAsync(user);
         }
     }
-
-    // private void LogInAsAdmin()
-    // {
-    //     currentUser = new User { Id = 1, Name = "Admin", IsAdmin = true };
-    //     StateHasChanged();
-    // }
-
-    // private void LogInAsUser()
-    // {
-    //     currentUser = new User { Id = 2, Name = "Regular User", IsAdmin = false };
-    //     StateHasChanged();
-    // }
 
     private async Task CreatePost()
     {
