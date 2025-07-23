@@ -30,8 +30,8 @@ builder.Services.AddIdentity<User, IdentityRole>()
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login";  // Redirect to login page if not authenticated
-        options.LogoutPath = "/Account/Logout";  // Redirect after logout
+        options.LoginPath = "/Login";
+        options.LogoutPath = "/Logout";
     });
 
 builder.Services.AddLogging(config =>
