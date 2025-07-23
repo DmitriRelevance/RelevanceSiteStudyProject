@@ -1,8 +1,11 @@
-﻿@using Microsoft.AspNetCore.Components.Routing
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Identity
 @using RelevanceSiteStudyProject.Data
 @using RelevanceSiteStudyProject.Shared
-@inject SignInManager<User> SignInManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject SignInManager<Data.User> SignInManager
+@inject UserManager<Data.User> UserManager
 @inject NavigationManager Navigation
 
 <ul class="nav">
@@ -18,24 +21,29 @@
     <li class="nav-item">
         <NavLink class="nav-link text-white" href="/db-posts">Database Posts</NavLink>
     </li>
-    <li class="nav-item">
-        <NavLink class="nav-link text-white" href="/login">Login</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link text-white" href="/logout">Logout</NavLink>
-    </li>
+
+    @if (!isAuthorized)
+    {
+        <li class="nav-item">
+            <NavLink class="nav-link text-white" href="/login">Login</NavLink>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <NavLink class="nav-link text-white" href="/logout">Logout</NavLink>
+        </li>
+    }
 </ul>
 
 
 @code {
-    protected override void OnInitialized()
-    {
-    }
+    private bool isAuthorized;
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-        }
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        isAuthorized = user.Identity?.IsAuthenticated ?? false;
     }
 }
