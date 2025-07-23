@@ -60,7 +60,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
                 UserId = currentUser.Id,
                 CategoryId = 1
             };
-            var addedPost = _postService.Add(newPost);
+            var addedPost = await _postService.Add(newPost);
             //Update the posts list with the new post
             requiresPostUpdate = true;
             postModel = new Post();

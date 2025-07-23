@@ -2,9 +2,6 @@
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="typeof(RelevanceSiteStudyProject.Components.Layout.MainLayout)">
-            <NotAuthorized>
-                <RedirectToLogin />
-            </NotAuthorized>
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
@@ -15,16 +12,3 @@
         </LayoutView>
     </NotFound>
 </Router>
-
-@code {
-    // Компонент для перенаправления на страницу логина
-    public class RedirectToLogin : ComponentBase
-    {
-        [Inject] private NavigationManager Navigation { get; set; } = default!;
-
-        protected override void OnInitialized()
-        {
-            Navigation.NavigateTo("/login", forceLoad: true);
-        }
-    }
-}
