@@ -115,26 +115,40 @@ else
     private Post? postToEdit = null;
     private (bool IsSuccess, string Message)? statusMessage;
 
+    private bool requiresPostUpdate = true;
+
     protected override async Task OnInitializedAsync()
     {
+        await UpdateAuthorizationState();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && currentUser is null)
+        {
+            Navigation.NavigateTo("/login", true);
+        }
+
+        if (firstRender)
+        {
+        }
+
+        if (requiresPostUpdate)
+        {
+            await GetPosts();
+            requiresPostUpdate = false;
+        }
+
+        await UpdateAuthorizationState();
+    }
+
+    private async Task UpdateAuthorizationState()
+    {
         var user = HttpContextAccessor.HttpContext?.User;
+
         if (user is not null)
         {
             currentUser = await UserManager.GetUserAsync(user);
-        }
-    }
-
-    protected override async Task OnAfterRenderAsync (bool firstRender)
-    {
-        // if (firstRender && currentUser is null)
-        // {
-        //     //Avoid redirecting because of issue ith Logi
-        //     //Navigation.NavigateTo("/login", true);
-        // }
-        
-        if(firstRender)
-        {
-            await GetPosts();
         }
     }
 
@@ -163,7 +177,7 @@ else
         };
         var addedPost = _postService.Add(newPost);
         //Update the posts list with the new post
-        await GetPosts();
+        requiresPostUpdate = true;
         postModel = new Post();
         statusMessage = (true, "Successfully added a post!");
     }
@@ -224,7 +238,7 @@ else
         try
         {
             await _postService.Update(postToEdit, currentUser);
-            await GetPosts();
+            requiresPostUpdate = true;
             isEditing = false;
             postToEdit = null;
             statusMessage = (true, "Post updated successfully.");
@@ -247,7 +261,7 @@ else
     {
         try
         {
-            if(currentUser is null)
+            if (currentUser is null)
                 throw new InvalidOperationException("User must be logged in to delete a post.");
 
             await _postService.Delete(post, currentUser);
@@ -259,6 +273,7 @@ else
             statusMessage = (false, "Failed to delete post. Please try again.");
         }
 
+        requiresPostUpdate = true;
         StateHasChanged();
     }
 }

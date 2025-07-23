@@ -34,7 +34,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Account/Logout";  // Redirect after logout
     });
 
-
 builder.Services.AddLogging(config =>
 {
     config.AddConsole();
@@ -56,7 +55,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHttpsRedirection();
-
 
 app.UseAntiforgery();
 

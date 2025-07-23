@@ -28,6 +28,7 @@ namespace RelevanceSiteStudyProject.Data
                     Email = "admin@site.com",
                     Name = "Admin User",
                     IsAdmin = true,
+                    EmailConfirmed = true,
                 };
                 var result = await userManager.CreateAsync(adminUser, "AdminPassword123!");
                 if (result.Succeeded)
@@ -45,6 +46,7 @@ namespace RelevanceSiteStudyProject.Data
                     Email = "firstUser@site.com",
                     Name = "Regular User",
                     IsAdmin = false,
+                    EmailConfirmed = true,
                 };
 
                 var result = await userManager.CreateAsync(regularUser, "UserPassword123!");

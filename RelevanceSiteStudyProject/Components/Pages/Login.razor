@@ -32,26 +32,18 @@
         if (user == null)
         {
             Console.WriteLine("User not found");
-            return; 
+            return;
         }
 
-        try
+        var result = await SignInManager.CheckPasswordSignInAsync(user, loginModel.Password, lockoutOnFailure: false);
+        if (result.Succeeded)
         {
-            var result = await SignInManager.PasswordSignInAsync(user, loginModel.Password, isPersistent: false, lockoutOnFailure: false);
-
-            if (result.Succeeded)
-            {
-                Navigation.NavigateTo("/db-posts", true);
-            }
-            else
-            {
-                Console.WriteLine("Login failed");
-            }
+            // Redirect to handler that performs the actual sign-in
+            Navigation.NavigateTo($"/signin-handler?email={Uri.EscapeDataString(loginModel.Email)}", true);
         }
-        catch (Exception ex)
+        else
         {
-            Console.WriteLine($"Error: {ex.Message}");
-            throw;
+            Console.WriteLine("Login failed");
         }
     }
 

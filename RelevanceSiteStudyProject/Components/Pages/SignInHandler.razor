@@ -1,0 +1,96 @@
+﻿@page "/signin-handler"
+@using Microsoft.AspNetCore.Identity
+@using RelevanceSiteStudyProject.Data
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@inject IJSRuntime JSRuntime
+
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+
+@if (signInSuccessful)
+{
+    <script>
+        window.location.href = "/db-posts";
+    </script>
+}
+
+
+@code {
+    [SupplyParameterFromQuery]
+    public string Email { get; set; } = string.Empty;
+
+    private bool isLoading = true;
+    private string errorMessage = string.Empty;
+    private bool signInSuccessful;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        if (string.IsNullOrEmpty(Email))
+        {
+            errorMessage = "No email provided.";
+            isLoading = false;
+            return;
+        }
+
+        var user = await UserManager.FindByEmailAsync(Email);
+        if (user is null)
+        {
+            errorMessage = "Email not found.";
+            isLoading = false;
+            return;
+        }
+
+        try
+        {
+            Console.WriteLine($"Signing in user: {user.UserName}");
+            await SignInManager.SignInAsync(user, isPersistent: false);
+            Console.WriteLine("Sign-in successful.");
+            signInSuccessful = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Sign-in failed: {ex.Message}");
+            errorMessage = "An error occurred during sign-in.";
+        }
+
+        isLoading = false;
+        //await HandleSignInResult();
+    }
+
+    private async Task HandleSignInResult()
+    {
+        if (!string.IsNullOrEmpty(errorMessage))
+        {
+            await JSRuntime.InvokeVoidAsync("eval", "window.location.href='/login?error=" + Uri.EscapeDataString(errorMessage) + "'");
+        }
+        else if (signInSuccessful)
+        {
+            await JSRuntime.InvokeVoidAsync("eval", "window.location.href='/db-posts'");
+        }
+    }
+
+    // protected override void OnAfterRender(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         if (!string.IsNullOrEmpty(errorMessage))
+    //         {
+    //             Navigation.NavigateTo("/login?error=" + Uri.EscapeDataString(errorMessage), forceLoad: true);
+    //         }
+    //         else if (signInSuccessful)
+    //         {
+    //             Navigation.NavigateTo("/db-posts", forceLoad: true);
+    //         }
+    //     }
+    }
+}
