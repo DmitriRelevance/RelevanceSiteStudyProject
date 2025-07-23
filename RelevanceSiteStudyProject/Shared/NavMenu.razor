@@ -2,40 +2,44 @@
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Identity
 @using RelevanceSiteStudyProject.Data
-@using RelevanceSiteStudyProject.Shared
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject SignInManager<Data.User> SignInManager
 @inject UserManager<Data.User> UserManager
 @inject NavigationManager Navigation
 
-<ul class="nav">
-    <li class="nav-item">
-        <NavLink class="nav-link text-white" href="/">Home</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link text-white" href="/pagination-posts">Pagination</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link text-white" href="/scroll-posts">Infinite Scroll</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link text-white" href="/db-posts">Database Posts</NavLink>
-    </li>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand" href="/">Study App</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-    @if (!isAuthorized)
-    {
-        <li class="nav-item">
-            <NavLink class="nav-link text-white" href="/login">Login</NavLink>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <NavLink class="nav-link text-white" href="@($"/logout?returnUrl={Uri.EscapeDataString(Navigation.Uri)}")">Logout</NavLink>
-        </li>
-    }
-</ul>
-
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+                <NavLink class="nav-link" href="/pagination-posts">Pagination</NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" href="/scroll-posts">Infinite Scroll</NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link" href="/db-posts">Database Posts</NavLink>
+            </li>
+            @if (!isAuthorized)
+            {
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/login">Login</NavLink>
+                </li>
+            }
+            else
+            {
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="@($"/logout?returnUrl={Uri.EscapeDataString(Navigation.Uri)}")">Logout</NavLink>
+                </li>
+            }
+        </ul>
+    </div>
+</nav>
 
 @code {
     private bool isAuthorized;
