@@ -14,88 +14,97 @@
 @rendermode InteractiveServer
 @page "/db-posts"
 
-<h1>Db Posts</h1>
+<FluentCard Style="padding: 20px;">
+    <h1>Db Posts</h1>
 
-@if (statusMessage.HasValue)
-{
-    <div class="alert alert-@(statusMessage.Value.IsSuccess ? "sucess" : "danger")" role="alert">
-        <strong>@(statusMessage.Value.IsSuccess ? "Success!" : "Error!")</strong>
-        @statusMessage.Value.Message
-    </div>
-}
 
-@if (currentUser is not null)
-{
-    <h2>Welcome, @currentUser.Name!</h2>
+    @if (statusMessage.HasValue)
+    {
+        <FluentMessageBar Title="@(statusMessage.Value.IsSuccess ? "Success!" : "Error!")"
+                          Intent="@(statusMessage.Value.IsSuccess ? MessageIntent.Success : MessageIntent.Error)">
+            @statusMessage.Value.Message
+        </FluentMessageBar>
+    }
 
-    <EditForm Model="@postModel" OnValidSubmit="CreatePost">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <div>
-            <h3>Write a new post</h3>
-            <div>
-                <label for="postTitle">Title</label>
-                <InputText id="postTitle" class="form-control" @bind-Value="postModel.Title" placeHolder="Title"></InputText>
-            </div>
-            <div>
-                <label for="postContent">Content</label>
-                <InputTextArea id="postContent" class="form-control" @bind-Value="postModel.Content" placeHolder="Content"></InputTextArea>
-            </div>
-            <button type="submit" class="btn btn-primary mt-2">Create Post</button>
-        </div>
-    </EditForm>
-}
+    @if (currentUser is not null)
+    {
+        <h2>Welcome, @currentUser.Name!</h2>
 
-<h3>Posts</h3>
 
-@if (@isLoading)
-{
-    <p>Loading posts...</p>
-}
-else if (posts.Count == 0)
-{
-    <p>No posts available.</p>
-}
-else
-{
-    <ul class="list-group">
-        @foreach (var post in posts)
-        {
-            <li class="list-group-item">
-                <h5>@post.Title</h5>
-                <p>@post.Content</p>
-                @if (currentUser != null && (currentUser.IsAdmin || post.UserId.Equals(currentUser.Id)))
-                {
-                    <button class="btn btn-secondary" @onclick="() => EditPost(post)">Edit</button>
-                    <button class="btn btn-danger" @onclick="() => DeletePost(post)">Delete</button>
+        <FluentCard Style="padding: 20px;">
+            <EditForm Model="@postModel" OnValidSubmit="CreatePost">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div>
+                    <h3>Write a new post</h3>
+                    <div>
+                        <label for="postTitle">Title</label>
+                        <InputText id="postTitle" class="form-control" @bind-Value="postModel.Title" placeHolder="Title"></InputText>
+                    </div>
+                    <div>
+                        <label for="postContent">Content</label>
+                        <InputTextArea id="postContent" class="form-control" @bind-Value="postModel.Content" placeHolder="Content"></InputTextArea>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Create Post</button>
+                </div>
+            </EditForm>
+        </FluentCard>
 
-                    @if (isEditing && postToEdit?.Id == post.Id)
-                    {
-                        <EditForm Model="@postToEdit" OnValidSubmit="SaveEdit">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
-                            <div>
-                                <h3>Edit Post</h3>
+    }
+
+</FluentCard>
+
+<FluentCard Style="margin-top: 30px; padding: 20px;">
+
+    <h3>Posts</h3>
+
+    @if (@isLoading)
+    {
+        <p>Loading posts...</p>
+    }
+    else if (posts.Count == 0)
+    {
+        <FluentMessageBar Intent="MessageIntent.Warning">No posts available.</FluentMessageBar>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var post in posts)
+            {
+                <FluentCard Style="margin-top: 10px; padding: 15px;">
+                    <li class="list-group-item">
+                        <h5>@post.Title</h5>
+                        <p>@post.Content</p>
+                        @if (currentUser != null && (currentUser.IsAdmin || post.UserId.Equals(currentUser.Id)))
+                        {
+                            <FluentButton @onclick="() => EditPost(post)">Edit</FluentButton>
+                            <FluentButton Appearance="Appearance.Accent" Style="margin-left: 10px;" @onclick="() => DeletePost(post)">Delete</FluentButton>
+
+                            @if (isEditing && postToEdit?.Id == post.Id)
+                            {
                                 <div>
-                                    <label for="postTitle">Title</label>
-                                    <InputText id="postTitle" class="form-control" @bind-Value="postToEdit.Title" placeHolder="@postToEdit.Title"></InputText>
+                                    <h3>Edit Post</h3>
+                                    <div>
+                                        <label for="postTitle">Title</label>
+                                        <InputText id="postTitle" class="form-control" @bind-Value="postToEdit.Title"></InputText>
+                                    </div>
+                                    <div>
+                                        <label for="postContent">Content</label>
+                                        <InputTextArea id="postContent" class="form-control" @bind-Value="postToEdit.Content"></InputTextArea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary mt-2">Save changes</button>
+                                    <button class="btn btn-secondary mt-2" @onclick="CancelEdit">Cancel</button>
                                 </div>
-                                <div>
-                                    <label for="postContent">Content</label>
-                                    <InputTextArea id="postContent" class="form-control" @bind-Value="postToEdit.Content" placeHolder="@postToEdit.Content"></InputTextArea>
-                                </div>
-                                <button type="submit" class="btn btn-primary mt-2">Save changes</button>
-                                <button class="btn btn-secondary mt-2" @onclick="CancelEdit">Cancel</button>
-                            </div>
-                        </EditForm>
-                    }
-                }
-            </li>
-        }
-    </ul>
-}
+                            }
+                        }
+                    </li>
+                </FluentCard>
+            }
+        </ul>
+    }
 
+</FluentCard>
 
 @code {
-    
+
 }

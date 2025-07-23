@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.FluentUI.AspNetCore.Components;
 using RelevanceSiteStudyProject.Components;
 using RelevanceSiteStudyProject.Data;
 using RelevanceSiteStudyProject.Interfaces;
@@ -35,6 +36,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
         options.SlidingExpiration = true;
     });
+
+builder.Services.AddFluentUIComponents();
 
 builder.Services.AddLogging(config =>
 {
