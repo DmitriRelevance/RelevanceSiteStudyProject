@@ -5,4 +5,32 @@
 
 <h3>Posts</h3>
 
+<button class="btn btn-primary" @onclick="ShowNotification">Show Notification</button>
 
+<Notification IsVisible="showNotification" Message="This is an important notification!" OnClose="CloseNotification" />
+
+@code {
+    private bool showNotification = false;
+
+    private void ShowNotification()
+    {
+        showNotification = true;
+        StateHasChanged(); // Ensure UI is updated
+
+        Task.Delay(15000).ContinueWith(_ =>
+            {
+                if (showNotification)
+                {
+                    CloseNotification();
+                    InvokeAsync(StateHasChanged);
+                }
+
+            }
+        );
+    }
+
+    private void CloseNotification()
+    {
+        showNotification = false;
+    }
+}

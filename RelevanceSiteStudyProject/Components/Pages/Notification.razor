@@ -1,0 +1,30 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@inherits ComponentBase
+
+@if (IsVisible)
+{
+    <div class="notification">
+        <span class="notification-message">@Message</span>
+        <button class="notification-close" @onclick="CloseNotification">X</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsVisible { get; set; } = false;
+
+    [Parameter]
+    public string Message { get; set; } = "This is a notification message.";
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private async Task CloseNotification(EventArgs e)
+    {
+        IsVisible = false;
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+}

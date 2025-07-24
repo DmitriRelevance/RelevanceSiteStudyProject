@@ -67,3 +67,44 @@ h1:focus {
 .navbar-brand {
     font-size: 1.25rem;
 }
+/* Notification container that spans the entire page */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: none;
+}
+
+/* Individual notification box */
+.notification {
+    background-color: #333;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    min-width: 250px;
+    text-align: center;
+    font-size: 16px;
+    animation: fadeInOut 3s ease-in-out;
+}
+
+/* Animation for fade in and fade out */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
