@@ -1,36 +1,42 @@
 ﻿@page "/"
 @using RelevanceSiteStudyProject.Services
+@using RelevanceSiteStudyProject.Components.Pages
+@using static RelevanceSiteStudyProject.Components.Pages.Notification
 @rendermode InteractiveServer
 @inject ApiService ApiService
 
 <h3>Posts</h3>
 
+<Notification IsVisible="showNotification" Message="@GetMessage()" Type=@(selectedType) OnClose="CloseNotification" />
+
+<label for="typeSelect">Select notifaction Type:</label>
+<select id="typeSelect" @bind="selectedType">
+    @foreach (var type in Enum.GetValues<NotificationInfoType>())
+    {
+        <option value="@type">@type</option>
+    }
+</select>
+
 <button class="btn btn-primary" @onclick="ShowNotification">Show Notification</button>
 
-<Notification IsVisible="showNotification" Message="This is an important notification!" OnClose="CloseNotification" />
 
 @code {
     private bool showNotification = false;
+    private NotificationInfoType selectedType = NotificationInfoType.Info;
 
     private void ShowNotification()
     {
         showNotification = true;
         StateHasChanged(); // Ensure UI is updated
-
-        Task.Delay(15000).ContinueWith(_ =>
-            {
-                if (showNotification)
-                {
-                    CloseNotification();
-                    InvokeAsync(StateHasChanged);
-                }
-
-            }
-        );
     }
 
     private void CloseNotification()
     {
         showNotification = false;
+    }
+
+    private string GetMessage()
+    {
+        return $"This is an {selectedType.ToString().ToLower()} notification!";
     }
 }

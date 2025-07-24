@@ -108,3 +108,33 @@ h1:focus {
         opacity: 0;
     }
 }
+
+.notification.info {
+    background-color: #0078D4; /* blue */
+}
+
+.notification.success {
+    background-color: #107C10; /* green */
+}
+
+.notification.warning {
+    background-color: #FFAA44; /* orange */
+}
+
+.notification.error {
+    background-color: #D13438; /* red */
+}
+
+.notification-message {
+    flex-grow: 1;
+    padding-right: 10px;
+}
+
+.notification-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}

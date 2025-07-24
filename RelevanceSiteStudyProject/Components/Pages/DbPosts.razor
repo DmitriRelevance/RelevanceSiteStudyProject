@@ -18,12 +18,15 @@
     <h1>Db Posts</h1>
 
 
-    @if (statusMessage.HasValue)
+    @if (showNotification)
     {
-        <FluentMessageBar Title="@(statusMessage.Value.IsSuccess ? "Success!" : "Error!")"
+        <Notification IsVisible=@showNotification Message="@(Notification?.Message)" Type="@(Notification?.Type ?? Pages.Notification.NotificationInfoType.Info)" OnClose="CloseNotification">
+
+        </Notification>
+        @* <FluentMessageBar Title="@(statusMessage.Value.IsSuccess ? "Success!" : "Error!")"
                           Intent="@(statusMessage.Value.IsSuccess ? MessageIntent.Success : MessageIntent.Error)">
             @statusMessage.Value.Message
-        </FluentMessageBar>
+        </FluentMessageBar> *@
     }
 
     @if (currentUser is not null)
@@ -92,7 +95,7 @@
                                         <label for="postContent">Content</label>
                                         <InputTextArea id="postContent" class="form-control" @bind-Value="postToEdit.Content"></InputTextArea>
                                     </div>
-                                    <button type="submit" class="btn btn-primary mt-2">Save changes</button>
+                                    <button type="submit" class="btn btn-primary mt-2" @onclick=SaveEdit>Save changes</button>
                                     <button class="btn btn-secondary mt-2" @onclick="CancelEdit">Cancel</button>
                                 </div>
                             }
@@ -107,4 +110,8 @@
 
 @code {
 
+    private void CloseNotification()
+    {
+        Notification = null;
+    }
 }

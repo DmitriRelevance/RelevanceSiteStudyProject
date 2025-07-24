@@ -1,4 +1,5 @@
 ﻿using RelevanceSiteStudyProject.ViewModels;
+using static RelevanceSiteStudyProject.Components.Pages.Notification;
 
 namespace RelevanceSiteStudyProject.Components.Pages
 {
@@ -10,7 +11,8 @@ namespace RelevanceSiteStudyProject.Components.Pages
         private Post postModel = new();
         private bool isEditing = false;
         private Post? postToEdit = null;
-        private (bool IsSuccess, string Message)? statusMessage;
+        private bool showNotification => this.Notification is not null;
+        private NotificationInfo? Notification { get; set; } = null;
 
         private bool requiresPostUpdate = true;
 
@@ -64,7 +66,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
             //Update the posts list with the new post
             requiresPostUpdate = true;
             postModel = new Post();
-            statusMessage = (true, "Successfully added a post!");
+            Notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Successfully added a post!" };
         }
 
         /// <summary>
@@ -83,7 +85,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
             catch (Exception ex)
             {
                 _logger.LogError($"Error loading posts: {ex.Message}");
-                statusMessage = (false, "Failed to create post. Please try again.");
+                Notification = new NotificationInfo { Type = NotificationInfoType.Error, Message = "Failed to create post. Please try again." };
             }
             finally
             {
@@ -126,12 +128,12 @@ namespace RelevanceSiteStudyProject.Components.Pages
                 requiresPostUpdate = true;
                 isEditing = false;
                 postToEdit = null;
-                statusMessage = (true, "Post updated successfully.");
+                Notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Post updated successfully." };
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error updating post: {ex.Message}");
-                statusMessage = (false, "Failed to update post. Please try again.");
+                Notification = new NotificationInfo { Type = NotificationInfoType.Error, Message = "Failed to update post. Please try again." };
             }
         }
 
@@ -150,12 +152,12 @@ namespace RelevanceSiteStudyProject.Components.Pages
                     throw new InvalidOperationException("User must be logged in to delete a post.");
 
                 await _postService.Delete(post, currentUser);
-                statusMessage = (true, "Post deleted successfully.");
+                Notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Post deleted successfully." };
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error deleting post: {ex.Message}");
-                statusMessage = (false, "Failed to delete post. Please try again.");
+                Notification = new NotificationInfo { Type = NotificationInfoType.Error, Message = "Failed to delete post. Please try again." };
             }
 
             requiresPostUpdate = true;
