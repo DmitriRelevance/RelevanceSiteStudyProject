@@ -11,7 +11,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
         private Post postModel = new();
         private bool isEditing = false;
         private Post? postToEdit = null;
-        private bool showNotification => this.Notification is not null;
+        private bool showNotification = false; // => this.Notification is not null;
         private NotificationInfo? Notification { get; set; } = null;
 
         private bool requiresPostUpdate = true;
@@ -66,7 +66,8 @@ namespace RelevanceSiteStudyProject.Components.Pages
             //Update the posts list with the new post
             requiresPostUpdate = true;
             postModel = new Post();
-            Notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Successfully added a post!" };
+            var notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Successfully added a post!" };
+            NotificationService.AddNotification(notification.Message, notification.Type);
         }
 
         /// <summary>
@@ -85,7 +86,8 @@ namespace RelevanceSiteStudyProject.Components.Pages
             catch (Exception ex)
             {
                 _logger.LogError($"Error loading posts: {ex.Message}");
-                Notification = new NotificationInfo { Type = NotificationInfoType.Error, Message = "Failed to create post. Please try again." };
+                var notification = new NotificationInfo { Type = NotificationInfoType.Error, Message = "Failed to create post. Please try again." };
+                NotificationService.AddNotification(notification.Message, notification.Type);
             }
             finally
             {
@@ -122,18 +124,27 @@ namespace RelevanceSiteStudyProject.Components.Pages
                 return;
             }
 
+            NotificationInfo? notification = null;
+
             try
             {
                 await _postService.Update(postToEdit, currentUser);
                 requiresPostUpdate = true;
                 isEditing = false;
                 postToEdit = null;
-                Notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Post updated successfully." };
+                notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Post updated successfully." };
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error updating post: {ex.Message}");
-                Notification = new NotificationInfo { Type = NotificationInfoType.Error, Message = "Failed to update post. Please try again." };
+                notification = new NotificationInfo { Type = NotificationInfoType.Error, Message = "Failed to update post. Please try again." };
+            }
+            finally
+            {
+                if (notification != null)
+                {
+                    NotificationService.AddNotification(notification.Message, notification.Type);
+                }
             }
         }
 
@@ -146,22 +157,29 @@ namespace RelevanceSiteStudyProject.Components.Pages
 
         private async Task DeletePost(Post post)
         {
+            NotificationInfo? notification = null;
+
             try
             {
                 if (currentUser is null)
                     throw new InvalidOperationException("User must be logged in to delete a post.");
 
                 await _postService.Delete(post, currentUser);
-                Notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Post deleted successfully." };
+                notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Post deleted successfully." };
+                requiresPostUpdate = true;
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error deleting post: {ex.Message}");
-                Notification = new NotificationInfo { Type = NotificationInfoType.Error, Message = "Failed to delete post. Please try again." };
+                notification = new NotificationInfo { Type = NotificationInfoType.Error, Message = "Failed to delete post. Please try again." };
             }
-
-            requiresPostUpdate = true;
-            StateHasChanged();
+            finally
+            {
+                if (notification != null)
+                {
+                    NotificationService.AddNotification(notification.Message, notification.Type);
+                }
+            }
         }
     }
 }

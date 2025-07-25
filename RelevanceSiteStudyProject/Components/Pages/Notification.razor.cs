@@ -1,0 +1,65 @@
+﻿using Microsoft.AspNetCore.Components;
+
+namespace RelevanceSiteStudyProject.Components.Pages
+{
+    public partial class Notification : ComponentBase
+    {
+
+        [Parameter]
+        public bool IsVisible { get; set; } = false;
+
+        [Parameter]
+        public NotificationInfoType Type { get; set; } = NotificationInfoType.Info; // Can be "info", "success", "warning", or "error"
+        public string NotificationTypeCss => this.Type.ToString().ToLower();
+
+        [Parameter]
+        public string Message { get; set; } = "This is a notification message.";
+
+        [Parameter]
+        public EventCallback OnClose { get; set; }
+
+        public class NotificationInfo
+        {
+            public string Title { get; set; } = string.Empty;
+            public string Message { get; set; } = string.Empty;
+            public NotificationInfoType Type { get; set; } = NotificationInfoType.Info;
+            public DateTime Timestamp { get; set; } = DateTime.Now;
+            public bool IsRead { get; set; } = false;
+        }
+
+        public enum NotificationInfoType
+        {
+            Success,
+            Info,
+            Warning,
+            Error,
+        }
+
+
+
+        private async Task CloseNotification()
+        {
+            IsVisible = false;
+            if (OnClose.HasDelegate)
+            {
+                await OnClose.InvokeAsync();
+            }
+        }
+
+        protected override async Task OnParametersSetAsync()
+        {
+            if (IsVisible)
+            {
+                // Delay for 3 seconds (3000 ms)
+                await Task.Delay(3000);
+
+                // If the notification is still visible after 3 seconds, close it automatically
+                if (IsVisible)
+                {
+                    await CloseNotification();
+                }
+            }
+        }
+
+    }
+}

@@ -13,7 +13,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -138,3 +138,48 @@ h1:focus {
     font-weight: bold;
     cursor: pointer;
 }
+
+.notification-bell {
+    position: fixed;
+    cursor: pointer;
+    top: 25px;
+    right: 20px;
+    z-index: 10000;
+}
+
+.bell-icon {
+    font-size: 20px;
+}
+
+.badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.notification-log {
+    position: absolute;
+    top: 40px;
+    right: 10px;
+    width: 300px;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 10000;
+    padding: 10px;
+}
+
+.notification-entry {
+    border-bottom: 1px solid #eee;
+    padding: 5px 0;
+    color: black;
+}
+
+    .notification-entry.unread {
+        font-weight: bold;
+    }

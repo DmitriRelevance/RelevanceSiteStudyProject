@@ -1,12 +1,15 @@
 ﻿@inherits LayoutComponentBase
+@using RelevanceSiteStudyProject.Components.Pages
 @using RelevanceSiteStudyProject.Shared
+@using static RelevanceSiteStudyProject.Components.Pages.Notification
 
 <link href="_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css" rel="stylesheet" />
 <link href="_content/Microsoft.FluentUI.AspNetCore.Components/css/theme.css" rel="stylesheet" />
 
 <div class="main-layout">
     <header class="bg-dark text-white p-3">
-            <NavMenu></NavMenu>
+        <NavMenu></NavMenu>
+        <NotificationBell />
     </header>
 
     <main class="container my-4">
@@ -17,3 +20,8 @@
         <small>&copy; @DateTime.Now.Year – Relevance Study App</small>
     </footer>
 </div>
+
+
+@code {
+
+}

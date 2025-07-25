@@ -21,6 +21,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHttpClient<ApiService>();
 builder.Services.AddScoped<ApiService>();
 builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=posts.db"));
 

@@ -3,7 +3,7 @@
 @using RelevanceSiteStudyProject.Components.Pages
 @using static RelevanceSiteStudyProject.Components.Pages.Notification
 @rendermode InteractiveServer
-@inject ApiService ApiService
+@inject NotificationService NotificationService
 
 <h3>Posts</h3>
 
@@ -27,6 +27,7 @@
     private void ShowNotification()
     {
         showNotification = true;
+        NotificationService.AddNotification(GetMessage(), selectedType);
         StateHasChanged(); // Ensure UI is updated
     }
 

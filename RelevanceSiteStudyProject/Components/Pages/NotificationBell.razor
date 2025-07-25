@@ -1,0 +1,25 @@
+﻿@rendermode InteractiveServer
+@inject NotificationService NotificationService
+
+<div class="notification-bell" @onclick="TogglePanel">
+    <span class="bell-icon">🔔</span>
+    @if (NotificationService.UnreadCount > 0)
+    {
+        <span class="badge">@NotificationService.UnreadCount</span>
+    }
+</div>
+
+@if (showPanel)
+{
+    <div class="notification-log">
+        @foreach (var note in NotificationService.Notifications.OrderByDescending(n => n.Timestamp))
+        {
+            <div class="notification-entry @(note.IsRead ? "read" : "unread")">
+                <strong>@note.Type</strong>: @note.Message
+                <span class="timestamp">@note.Timestamp.ToShortTimeString()</span>
+            </div>
+        }
+
+        <button @onclick="MarkAllAsRead">Mark all as read</button>
+    </div>
+}

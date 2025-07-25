@@ -11,6 +11,7 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IPostService _postService
 @inject ILogger<DbPosts> _logger
+@inject NotificationService NotificationService
 @rendermode InteractiveServer
 @page "/db-posts"
 
@@ -23,10 +24,6 @@
         <Notification IsVisible=@showNotification Message="@(Notification?.Message)" Type="@(Notification?.Type ?? Pages.Notification.NotificationInfoType.Info)" OnClose="CloseNotification">
 
         </Notification>
-        @* <FluentMessageBar Title="@(statusMessage.Value.IsSuccess ? "Success!" : "Error!")"
-                          Intent="@(statusMessage.Value.IsSuccess ? MessageIntent.Success : MessageIntent.Error)">
-            @statusMessage.Value.Message
-        </FluentMessageBar> *@
     }
 
     @if (currentUser is not null)
