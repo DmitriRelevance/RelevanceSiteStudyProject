@@ -1,5 +1,7 @@
 ﻿@rendermode InteractiveServer
 @inject NotificationService NotificationService
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <div class="notification-bell" @onclick="TogglePanel">
     <span class="bell-icon">🔔</span>
@@ -11,7 +13,7 @@
 
 @if (showPanel)
 {
-    <div class="notification-log">
+    <div id= "notificationPanel" class="notification-log" @ref="panelRef" hidden ="@(!showPanel)">
         @foreach (var note in NotificationService.Notifications.OrderByDescending(n => n.Timestamp))
         {
             <div class="notification-entry @(note.IsRead ? "read" : "unread")">
