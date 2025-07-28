@@ -67,9 +67,9 @@ namespace RelevanceSiteStudyProject.Infrasactructure.Data
             if (!context.Categories.Any())
             {
                 context.Categories.AddRange(
-                    new Category { Id = 1, Name = "Technology" },
-                    new Category { Id = 2, Name = "Health" },
-                    new Category { Id = 3, Name = "Lifestyle" }
+                    new Category { Name = "Technology" },
+                    new Category { Name = "Health" },
+                    new Category { Name = "Lifestyle" }
                 );
             }
 
