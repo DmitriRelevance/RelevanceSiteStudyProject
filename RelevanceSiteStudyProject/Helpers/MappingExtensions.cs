@@ -1,17 +1,17 @@
-﻿using RelevanceSiteStudyProject;
-using RelevanceSiteStudyProject.ViewModels;
+﻿using RelevanceSiteStudyProject.ViewModels;
+using Entities = RelevanceSiteStudyProject.Core.Entities;
 
 namespace RelevanceSiteStudyProject.Helpers
 {
     public static class MappingExtensions
     {
-        public static Data.User ToDataModel(User user)
+        public static Entities.User ToDataModel(User user)
         {
             if (user == null)
             {
                 return new();
             }
-            return new Data.User
+            return new Entities.User
             {
                 Id = user.Id,
                 Name = user.Name,
@@ -19,7 +19,7 @@ namespace RelevanceSiteStudyProject.Helpers
                 IsAdmin = user.IsAdmin,
             };
         }
-        public static User ToViewModel(Data.User user)
+        public static User ToViewModel(Entities.User user)
         {
             if (user == null)
             {
@@ -33,19 +33,19 @@ namespace RelevanceSiteStudyProject.Helpers
                 IsAdmin = user.IsAdmin,
             };
         }
-        public static Data.Category ToDataModel(Category category)
+        public static Entities.Category ToDataModel(Category category)
         {
             if (category == null)
             {
-                return new Data.Category();
+                return new Entities.Category();
             }
-            return new Data.Category
+            return new Entities.Category
             {
                 Id = category.Id,
                 Name = category.Name
             };
         }
-        public static Category ToViewModel(Data.Category category)
+        public static Category ToViewModel(Entities.Category category)
         {
             if (category == null)
             {
@@ -57,13 +57,13 @@ namespace RelevanceSiteStudyProject.Helpers
                 Name = category.Name
             };
         }
-        public static Data.Post ToDataModel(Post post)
+        public static Entities.Post ToDataModel(Post post)
         {
             if (post == null)
             {
-                return new Data.Post();
+                return new Entities.Post();
             }
-            return new Data.Post
+            return new Entities.Post
             {
                 Id = post.Id,
                 Title = post.Title,
@@ -76,7 +76,7 @@ namespace RelevanceSiteStudyProject.Helpers
                 //Category = ToDataModel(post.Category)
             };
         }
-        public static Post ToViewModel(Data.Post post)
+        public static Post ToViewModel(Entities.Post post)
         {
             if (post == null)
             {

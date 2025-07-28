@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RelevanceSiteStudyProject.Data
+namespace RelevanceSiteStudyProject.Core.Entities
 {
     public class LogEntry
     {

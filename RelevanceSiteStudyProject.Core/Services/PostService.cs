@@ -1,16 +1,15 @@
 ﻿//using Microsoft.EntityFrameworkCore;
-//using RelevanceSiteStudyProject.Interfaces;
-//using RelevanceSiteStudyProject.Helpers;
-//using RelevanceSiteStudyProject.ViewModels;
+//using Microsoft.Extensions.Logging;
+//using RelevanceSiteStudyProject.Core.Interfaces;
 
-//namespace RelevanceSiteStudyProject.Services
+//namespace RelevanceSiteStudyProject.Core.Services
 //{
 //    public class PostService : IPostService
 //    {
-//        private readonly Data.AppDbContext _context;
+//        private readonly RelevanceSiteStudyProject.Infrasactructure.Data.AppDbContext _context;
 //        private readonly ILogger<PostService> _logger;
 
-//        public PostService(Data.AppDbContext context, ILogger<PostService> logger)
+//        public PostService(RelevanceSiteStudyProject.Data.AppDbContext context, ILogger<PostService> logger)
 //        {
 //            _context = context;
 //            _logger = logger;

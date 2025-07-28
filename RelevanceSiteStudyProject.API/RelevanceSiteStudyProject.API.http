@@ -1,0 +1,11 @@
+﻿@RelevanceSiteStudyProject.API_HostAddress = https://localhost:7171
+
+POST {{RelevanceSiteStudyProject.API_HostAddress}}/todoitems
+Content-Type: application/json
+
+{
+  "name":"walk dog",
+  "isComplete":true
+}
+
+###

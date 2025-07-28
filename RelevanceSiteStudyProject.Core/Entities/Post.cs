@@ -1,4 +1,4 @@
-﻿namespace RelevanceSiteStudyProject.Data
+﻿namespace RelevanceSiteStudyProject.Core.Entities
 {
     public class Post
     {

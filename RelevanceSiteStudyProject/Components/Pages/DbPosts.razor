@@ -1,12 +1,12 @@
 ﻿@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Identity
 @using RelevanceSiteStudyProject.Core.Entities
-@using RelevanceSiteStudyProject.Interfaces
+@using RelevanceSiteStudyProject.Core.Interfaces
 @using RelevanceSiteStudyProject.Helpers
 @using RelevanceSiteStudyProject.Services
 @using RelevanceSiteStudyProject.ViewModels
-@inject SignInManager<Data.User> SignInManager
-@inject UserManager<Data.User> UserManager
+@inject SignInManager<RelevanceSiteStudyProject.Core.Entities.User> SignInManager
+@inject UserManager<RelevanceSiteStudyProject.Core.Entities.User> UserManager
 @inject NavigationManager Navigation
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IPostService _postService

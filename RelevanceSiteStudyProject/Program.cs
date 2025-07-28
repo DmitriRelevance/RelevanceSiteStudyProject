@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
 using RelevanceSiteStudyProject.Components;
-using RelevanceSiteStudyProject.Data;
-using RelevanceSiteStudyProject.Interfaces;
+using RelevanceSiteStudyProject.Core.Entities;
+using RelevanceSiteStudyProject.Core.Interfaces;
+using RelevanceSiteStudyProject.Infrasactructure.Data;
 using RelevanceSiteStudyProject.Services;
+using RelevanceSiteStudyProject.Services.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

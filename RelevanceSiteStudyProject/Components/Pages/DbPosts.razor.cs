@@ -1,4 +1,5 @@
-﻿using RelevanceSiteStudyProject.ViewModels;
+﻿using RelevanceSiteStudyProject.Helpers;
+using RelevanceSiteStudyProject.ViewModels;
 using static RelevanceSiteStudyProject.Components.Pages.Notification;
 
 namespace RelevanceSiteStudyProject.Components.Pages
@@ -7,7 +8,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
     {
         private bool isLoading = true;
         private IList<Post> posts = new List<Post>();
-        private Data.User? currentUser;
+        private RelevanceSiteStudyProject.Core.Entities.User? currentUser;
         private Post postModel = new();
         private bool isEditing = false;
         private Post? postToEdit = null;
@@ -62,7 +63,12 @@ namespace RelevanceSiteStudyProject.Components.Pages
                 UserId = currentUser.Id,
                 CategoryId = 1
             };
-            var addedPost = await _postService.Add(newPost);
+
+
+
+            var mappedPost = MappingExtensions.ToDataModel(newPost);
+
+            var addedPost = await _postService.Add(mappedPost);
             //Update the posts list with the new post
             requiresPostUpdate = true;
             postModel = new Post();
@@ -79,7 +85,8 @@ namespace RelevanceSiteStudyProject.Components.Pages
             try
             {
                 isLoading = true;
-                posts = await _postService.GetPosts();
+                var dbPosts = await _postService.GetPosts();
+                posts = MappingExtensions.ToViewModel<RelevanceSiteStudyProject.Core.Entities.Post, Post>(dbPosts, MappingExtensions.ToViewModel);
                 _logger.LogInformation($"Loaded {posts.Count} posts.");
                 //statusMessage = (true, "Posts loaded successfully.");
             }
@@ -128,7 +135,9 @@ namespace RelevanceSiteStudyProject.Components.Pages
 
             try
             {
-                await _postService.Update(postToEdit, currentUser);
+                var dbPostToEdit = MappingExtensions.ToDataModel(postToEdit);
+
+                await _postService.Update(dbPostToEdit, currentUser);
                 requiresPostUpdate = true;
                 isEditing = false;
                 postToEdit = null;
@@ -164,7 +173,9 @@ namespace RelevanceSiteStudyProject.Components.Pages
                 if (currentUser is null)
                     throw new InvalidOperationException("User must be logged in to delete a post.");
 
-                await _postService.Delete(post, currentUser);
+                var dbPost = MappingExtensions.ToDataModel(post);
+
+                await _postService.Delete(dbPost, currentUser);
                 notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Post deleted successfully." };
                 requiresPostUpdate = true;
             }

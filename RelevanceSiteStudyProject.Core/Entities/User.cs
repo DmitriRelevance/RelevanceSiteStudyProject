@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace RelevanceSiteStudyProject.Data
+namespace RelevanceSiteStudyProject.Core.Entities
 {
     public class User : IdentityUser
     {

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RelevanceSiteStudyProject.Core.Entities;
 
-namespace RelevanceSiteStudyProject.Data
+namespace RelevanceSiteStudyProject.Infrasactructure.Data
 {
     public static class SeedData
     {
