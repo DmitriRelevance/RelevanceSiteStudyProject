@@ -1,12 +1,13 @@
-﻿using RelevanceSiteStudyProject.Core.Entities;
+﻿using RelevanceSiteStudyProject.Core.DTOs;
+using RelevanceSiteStudyProject.Core.Entities;
 
 namespace RelevanceSiteStudyProject.Core.Interfaces
 {
     public interface IPostService
     {
-        Task<Post> Add(Post post);
-        Task<IList<Post>> GetPosts();
-        Task Update(Post post, User currentUser);
-        Task Delete(Post post, User currentUser);
+        Task<PostDto> Add(PostDto post);
+        Task<IList<PostDto>> GetPosts();
+        Task Update(PostDto post, User currentUser);
+        Task Delete(PostDto post, User currentUser);
     }
 }

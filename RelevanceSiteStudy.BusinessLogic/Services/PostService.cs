@@ -2,6 +2,8 @@
 using RelevanceSiteStudyProject.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 using RelevanceSiteStudyProject.Core.Entities;
+using RelevanceSiteStudyProject.Core.DTOs;
+using RelevanceSiteStudyProject.Core.Mappers;
 
 namespace RelevanceSiteStudyProject.Services.Services
 {
@@ -16,13 +18,17 @@ namespace RelevanceSiteStudyProject.Services.Services
             _logger = logger;
         }
 
-        public async Task<Post> Add(Post post)
+        public async Task<PostDto> Add(PostDto post)
         {
             try
             {
-                _context.Posts.Add(post);
+                var postEntity = PostMapper.ToEntity(post);
+
+                var addedPost  = _context.Posts.Add(postEntity);
                 await _context.SaveChangesAsync();
-                return post;
+                var dtoResult = PostMapper.ToDto(addedPost.Entity);
+
+                return dtoResult;
             }
             catch (Exception ex)
             {
@@ -38,12 +44,13 @@ namespace RelevanceSiteStudyProject.Services.Services
             }
 
         }
-        public async Task<IList<Post>> GetPosts()
+        public async Task<IList<PostDto>> GetPosts()
          {
             var dbPosts = await _context.Posts.ToListAsync();
-            return dbPosts;
+            var result = PostMapper.ToDto<Post, PostDto>(dbPosts, p => p.ToDto());
+              return result;
         }
-        public async Task Update(Post post, User currentUser)
+        public async Task Update(PostDto post, User currentUser)
         {
             try
             {
@@ -77,7 +84,7 @@ namespace RelevanceSiteStudyProject.Services.Services
                 throw;
             }
         }
-        public async Task Delete(Post post, User currentUser)
+        public async Task Delete(PostDto post, User currentUser)
         {
             var existingPost = await _context.Posts.FindAsync(post.Id);
             if (existingPost is null)

@@ -1,4 +1,5 @@
-﻿using RelevanceSiteStudyProject.Helpers;
+﻿using RelevanceSiteStudyProject.Core.DTOs;
+using RelevanceSiteStudyProject.Helpers;
 using RelevanceSiteStudyProject.ViewModels;
 using static RelevanceSiteStudyProject.Components.Pages.Notification;
 
@@ -7,11 +8,11 @@ namespace RelevanceSiteStudyProject.Components.Pages
     public partial class DbPosts
     {
         private bool isLoading = true;
-        private IList<Post> posts = new List<Post>();
+        private IList<PostDto> posts = new List<PostDto>();
         private RelevanceSiteStudyProject.Core.Entities.User? currentUser;
         private Post postModel = new();
         private bool isEditing = false;
-        private Post? postToEdit = null;
+        private PostDto? postToEdit = null;
         private bool showNotification = false; // => this.Notification is not null;
         private NotificationInfo? Notification { get; set; } = null;
 
@@ -56,7 +57,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
         {
             if (currentUser == null) return;
 
-            var newPost = new Post
+            var newPost = new PostDto
             {
                 Title = postModel.Title,
                 Content = postModel.Content,
@@ -64,11 +65,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
                 CategoryId = 1
             };
 
-
-
-            var mappedPost = MappingExtensions.ToDataModel(newPost);
-
-            var addedPost = await _postService.Add(mappedPost);
+            var addedPost = await _postService.Add(newPost);
             //Update the posts list with the new post
             requiresPostUpdate = true;
             postModel = new Post();
@@ -85,8 +82,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
             try
             {
                 isLoading = true;
-                var dbPosts = await _postService.GetPosts();
-                posts = MappingExtensions.ToViewModel<RelevanceSiteStudyProject.Core.Entities.Post, Post>(dbPosts, MappingExtensions.ToViewModel);
+                posts = await _postService.GetPosts();
                 _logger.LogInformation($"Loaded {posts.Count} posts.");
                 //statusMessage = (true, "Posts loaded successfully.");
             }
@@ -103,7 +99,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
             }
         }
 
-        private async Task EditPost(Post post)
+        private async Task EditPost(PostDto post)
         {
             if (currentUser == null || (!currentUser.IsAdmin && post.UserId != currentUser.Id))
             {
@@ -112,7 +108,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
 
             isEditing = true;
 
-            postToEdit = new Post
+            postToEdit = new PostDto
             {
                 Id = post.Id,
                 Title = post.Title,
@@ -135,9 +131,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
 
             try
             {
-                var dbPostToEdit = MappingExtensions.ToDataModel(postToEdit);
-
-                await _postService.Update(dbPostToEdit, currentUser);
+                await _postService.Update(postToEdit, currentUser);
                 requiresPostUpdate = true;
                 isEditing = false;
                 postToEdit = null;
@@ -164,7 +158,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
             StateHasChanged();
         }
 
-        private async Task DeletePost(Post post)
+        private async Task DeletePost(PostDto post)
         {
             NotificationInfo? notification = null;
 
@@ -173,9 +167,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
                 if (currentUser is null)
                     throw new InvalidOperationException("User must be logged in to delete a post.");
 
-                var dbPost = MappingExtensions.ToDataModel(post);
-
-                await _postService.Delete(dbPost, currentUser);
+                await _postService.Delete(post, currentUser);
                 notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Post deleted successfully." };
                 requiresPostUpdate = true;
             }

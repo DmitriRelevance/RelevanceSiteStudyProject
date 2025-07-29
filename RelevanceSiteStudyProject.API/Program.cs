@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RelevanceSiteStudyProject.Core.DTOs;
 using RelevanceSiteStudyProject.Core.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,8 +21,8 @@ var app = builder.Build();
 
 // Map routes to PostService
 app.MapGet("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService) => await postService.GetPosts());
-app.MapPost("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, Post post) => await postService.Add(post));
-//app.MapPut("/posts/{id}", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, int id, Post post) => await postService.Update(post, id));
+app.MapPost("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, PostDto post) => await postService.Add(post));
+//app.MapPut("/posts/{id}", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, int id, PostDto post) => await postService.Update(post, id));
 //app.MapDelete("/posts/{id}", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, int id) => await postService.Delete(id));
 
 app.Run();
