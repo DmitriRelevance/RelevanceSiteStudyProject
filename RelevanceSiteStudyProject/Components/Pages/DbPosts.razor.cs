@@ -56,7 +56,7 @@ namespace RelevanceSiteStudyProject.Components.Pages
         {
             if (currentUser == null) return;
 
-            var newPost = new PostDto
+            var newPost = new PostCreateDto
             {
                 Title = postModel.Title,
                 Content = postModel.Content,
@@ -64,7 +64,9 @@ namespace RelevanceSiteStudyProject.Components.Pages
                 CategoryId = 1
             };
 
-            var addedPost = await _postService.Add(newPost);
+            var addedPost = await _postApiClient.AddPostAsync(newPost);
+
+            //var addedPost = await _postService.Add(newPost);
             //Update the posts list with the new post
             requiresPostUpdate = true;
             postModel = new Post();

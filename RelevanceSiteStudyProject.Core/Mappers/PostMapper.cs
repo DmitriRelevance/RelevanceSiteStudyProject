@@ -40,5 +40,18 @@ namespace RelevanceSiteStudyProject.Core.Mappers
 
             return input.Select(mapFunc).ToList();
         }
+
+        public static Post ToEntity(this PostCreateDto postCreateDto)
+        {
+            if (postCreateDto == null)
+                throw new ArgumentNullException(nameof(postCreateDto));
+            return new Post
+            {
+                Title = postCreateDto.Title,
+                Content = postCreateDto.Content,
+                UserId = postCreateDto.UserId,
+                CategoryId = postCreateDto.CategoryId
+            };
+        }
     }
 }

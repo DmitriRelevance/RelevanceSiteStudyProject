@@ -18,7 +18,7 @@ namespace RelevanceSiteStudyProject.Services.Services
             _logger = logger;
         }
 
-        public async Task<PostDto> Add(PostDto post)
+        public async Task<PostDto> Add(PostCreateDto post)
         {
             try
             {

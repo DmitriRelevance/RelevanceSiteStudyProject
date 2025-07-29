@@ -25,7 +25,7 @@ app.MapDefaultEndpoints();
 
 // Map routes to PostService
 app.MapGet("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService) => await postService.GetPosts());
-app.MapPost("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, PostDto post) => await postService.Add(post));
+app.MapPost("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, PostCreateDto post) => await postService.Add(post));
 //app.MapPut("/posts/{id}", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, int id, PostDto post) => await postService.Update(post, id));
 //app.MapDelete("/posts/{id}", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, int id) => await postService.Delete(id));
 

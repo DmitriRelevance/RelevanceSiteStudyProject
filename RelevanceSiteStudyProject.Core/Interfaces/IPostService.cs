@@ -5,7 +5,7 @@ namespace RelevanceSiteStudyProject.Core.Interfaces
 {
     public interface IPostService
     {
-        Task<PostDto> Add(PostDto post);
+        Task<PostDto> Add(PostCreateDto post);
         Task<IList<PostDto>> GetPosts();
         Task Update(PostDto post, User currentUser);
         Task Delete(PostDto post, User currentUser);
