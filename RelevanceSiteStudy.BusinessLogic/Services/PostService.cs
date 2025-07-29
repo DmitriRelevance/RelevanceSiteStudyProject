@@ -39,7 +39,7 @@ namespace RelevanceSiteStudyProject.Services.Services
 
         }
         public async Task<IList<Post>> GetPosts()
-        {
+         {
             var dbPosts = await _context.Posts.ToListAsync();
             return dbPosts;
         }
