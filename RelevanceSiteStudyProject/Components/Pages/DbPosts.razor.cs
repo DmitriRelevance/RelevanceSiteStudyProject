@@ -1,5 +1,4 @@
 ﻿using RelevanceSiteStudyProject.Core.DTOs;
-using RelevanceSiteStudyProject.Helpers;
 using RelevanceSiteStudyProject.ViewModels;
 using static RelevanceSiteStudyProject.Components.Pages.Notification;
 
@@ -82,7 +81,9 @@ namespace RelevanceSiteStudyProject.Components.Pages
             try
             {
                 isLoading = true;
-                posts = await _postService.GetPosts();
+
+                posts = await _postApiClient.GetPostsAsync();
+
                 _logger.LogInformation($"Loaded {posts.Count} posts.");
                 //statusMessage = (true, "Posts loaded successfully.");
             }

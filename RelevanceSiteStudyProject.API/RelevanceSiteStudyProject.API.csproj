@@ -16,6 +16,7 @@
     <ProjectReference Include="..\RelevanceSiteStudy.BusinessLogic\RelevanceSiteStudy.Services.csproj" />
     <ProjectReference Include="..\RelevanceSiteStudyProject.Core\RelevanceSiteStudyProject.Core.csproj" />
     <ProjectReference Include="..\RelevanceSiteStudyProject.Infrasactructure\RelevanceSiteStudyProject.Infrasactructure.csproj" />
+    <ProjectReference Include="..\RelevanceSiteStudyProject.ServiceDefaults\RelevanceSiteStudyProject.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,6 +3,8 @@ using RelevanceSiteStudyProject.Core.DTOs;
 using RelevanceSiteStudyProject.Core.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Register services
@@ -18,6 +20,8 @@ builder.Services.AddLogging(config =>
 });
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 // Map routes to PostService
 app.MapGet("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService) => await postService.GetPosts());
