@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.FluentUI.AspNetCore.Components;
 using RelevanceSiteStudyProject.Components;
+using RelevanceSiteStudyProject.Configuration;
 using RelevanceSiteStudyProject.Core.Entities;
 using RelevanceSiteStudyProject.Core.Interfaces;
 using RelevanceSiteStudyProject.Infrasactructure.Data;
@@ -10,6 +12,8 @@ using RelevanceSiteStudyProject.Services;
 using RelevanceSiteStudyProject.Services.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddHttpContextAccessor();
@@ -21,7 +25,14 @@ builder.Services.AddRazorComponents()
     });
 
 builder.Services.AddHttpClient<ApiService>();
-builder.Services.AddScoped<ApiService>();
+
+builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+builder.Services.AddHttpClient<PostApiClient>((sp, client) =>
+{
+    var apiSettings = sp.GetRequiredService<IOptions<ApiSettings>>().Value;
+    client.BaseAddress = new Uri(apiSettings.BaseUrl);
+});
+
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<NotificationService>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -51,6 +62,8 @@ builder.Services.AddLogging(config =>
 });
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

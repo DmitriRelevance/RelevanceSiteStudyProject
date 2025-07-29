@@ -32,7 +32,7 @@ namespace RelevanceSiteStudyProject.Core.Mappers
         }
 
         public static IList<TOutput> ToDto<TInput, TOutput>(IList<TInput> input, Func<TInput, TOutput> mapFunc)
-           {
+        {
             if (input == null)
                 throw new ArgumentNullException(nameof(input), "Input cannot be null.");
             if (mapFunc == null)
