@@ -36,6 +36,27 @@ namespace RelevanceSiteStudyProject.Services
 
         public async Task UpdatePostAsync(PostDto post)
         {
+            await SetAuthorizationHeaderAsync();
+
+            string serializedJson = JsonSerializer.Serialize(post);
+
+            var content = new StringContent(serializedJson, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"posts/{post.Id}", content);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        public async Task DeletePostAsync(int postId)
+        {
+            await SetAuthorizationHeaderAsync();
+
+            var response = await _httpClient.DeleteAsync($"posts/{postId}");
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        private async Task SetAuthorizationHeaderAsync()
+        {
             var token = await _tokenProvider.GetTokenAsync();
             if (string.IsNullOrEmpty(token))
             {
@@ -46,12 +67,6 @@ namespace RelevanceSiteStudyProject.Services
                 token = token.Trim('"'); // Fix it
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             }
-
-            string serializedJson = JsonSerializer.Serialize(post);
-
-            var content = new StringContent(serializedJson, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PutAsync($"posts/{post.Id}", content);
-            response.EnsureSuccessStatusCode();
         }
     }
 }

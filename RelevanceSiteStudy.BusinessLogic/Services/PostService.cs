@@ -76,50 +76,19 @@ namespace RelevanceSiteStudyProject.Services.Services
                 throw new UnauthorizedAccessException("You cannot edit this post.");
             }
         }
-
-        //public async Task Update(PostDto post, User currentUser)
-        //{
-        //    try
-        //    {
-        //        var existingPost = _context.Posts.FirstOrDefault(p => p.Id == post.Id);
-        //        if (existingPost is null)
-        //            throw new KeyNotFoundException("Couldn't find your post!");
-
-        //        if (currentUser != null && (currentUser.IsAdmin || existingPost.UserId.Equals(currentUser.Id)))
-        //        {
-        //            existingPost.Title = post.Title;
-        //            existingPost.Content = post.Content;
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        else
-        //        {
-        //            throw new UnauthorizedAccessException("You do not have permission to edit this post.");
-        //        }
-
-        //        return;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"Error during {nameof(Update)} the post: {ex.Message}");
-        //        _context.LogEntries.Add(new LogEntry
-        //        {
-        //            Message = $"Error adding post: {ex.Message}",
-        //            StackTrace = ex?.StackTrace ?? string.Empty,
-        //            Timestamp = DateTime.UtcNow,
-        //            Action = nameof(Update),
-        //        });
-        //        throw;
-        //    }
-        //}
-        public async Task Delete(PostDto post, User currentUser)
+        public async Task Delete(int postId, string userId)
         {
-            var existingPost = await _context.Posts.FindAsync(post.Id);
+            var existingPost = await _context.Posts.FindAsync(postId);
             if (existingPost is null)
             {
                 throw new KeyNotFoundException("Post not found");
             }
 
-            if (currentUser != null && (existingPost.UserId.Equals(currentUser.Id) || currentUser.IsAdmin))
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                throw new UnauthorizedAccessException("User not found.");
+
+            if (user != null && (existingPost.UserId.Equals(user.Id) || user.IsAdmin))
             {
                 _context.Posts.Remove(existingPost);
                 await _context.SaveChangesAsync();

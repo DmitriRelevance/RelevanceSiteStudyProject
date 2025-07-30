@@ -82,7 +82,6 @@ app.MapPost("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostServ
 app.MapPut("/posts/{id}", async (
     HttpContext context,
     IPostService postService,
-    int id,
     PostDto post) =>
 {
     var user = context.User;
@@ -116,11 +115,29 @@ app.MapPut("/posts/{id}", async (
     {
         return Results.Problem(ex.Message);
     }
-
-
-
 });
-//app.MapDelete("/posts/{id}", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, int id) => await postService.Delete(id));
+
+app.MapDelete("/posts/{id}", async (
+    HttpContext context,
+    RelevanceSiteStudyProject.Core.Interfaces.IPostService postService,
+    int id) => 
+{
+    var user = context.User;
+    if (user.Identity is not { IsAuthenticated: true })
+    {
+        return Results.Unauthorized();
+    }
+
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Unauthorized();
+    }
+
+    await postService.Delete(id, userId);
+    return Results.NoContent();
+});
 
 
 app.MapPost("/login", async (LoginDto login, UserManager<User> userManager, IJWTTokenService jwtTokenService, IConfiguration config) =>

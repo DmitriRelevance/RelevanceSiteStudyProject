@@ -173,7 +173,9 @@ namespace RelevanceSiteStudyProject.Components.Pages
                 if (currentUser is null)
                     throw new InvalidOperationException("User must be logged in to delete a post.");
 
-                await _postService.Delete(post, currentUser);
+                await _postApiClient.DeletePostAsync(post.Id);
+
+                //await _postService.Delete(post.Id, currentUser.Id);
                 notification = new NotificationInfo { Type = NotificationInfoType.Info, Message = "Post deleted successfully." };
                 requiresPostUpdate = true;
             }

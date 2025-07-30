@@ -8,6 +8,6 @@ namespace RelevanceSiteStudyProject.Core.Interfaces
         Task<PostDto> Add(PostCreateDto post);
         Task<IList<PostDto>> GetPosts();
         Task Update(PostDto dto, string userId);
-        Task Delete(PostDto post, User currentUser);
+        Task Delete(int postId, string userId);
     }
 }
