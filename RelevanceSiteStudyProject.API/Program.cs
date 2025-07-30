@@ -6,6 +6,7 @@ using RelevanceSiteStudyProject.Core.Entities;
 using RelevanceSiteStudyProject.Core.Interfaces;
 using RelevanceSiteStudyProject.Core.Services;
 using RelevanceSiteStudyProject.Infrasactructure.Data;
+using RelevanceSiteStudyProject.Services.Services;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +22,7 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<RelevanceSiteStudyProject.Core.Interfaces.IPostService, RelevanceSiteStudyProject.Services.Services.PostService>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IJWTTokenService, JWTTokenService>();
 
 
@@ -97,7 +98,6 @@ app.MapPut("/posts/{id}", async (
         return Results.Unauthorized();
     }
 
-    // Call service method with user info
     try
     {
         await postService.Update(post, userId);
@@ -119,7 +119,7 @@ app.MapPut("/posts/{id}", async (
 
 app.MapDelete("/posts/{id}", async (
     HttpContext context,
-    RelevanceSiteStudyProject.Core.Interfaces.IPostService postService,
+    IPostService postService,
     int id) => 
 {
     var user = context.User;
