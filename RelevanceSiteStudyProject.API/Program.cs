@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using RelevanceSiteStudyProject.Core.DTOs;
 using RelevanceSiteStudyProject.Core.Entities;
 using RelevanceSiteStudyProject.Core.Interfaces;
+using RelevanceSiteStudyProject.Core.Services;
 using RelevanceSiteStudyProject.Infrasactructure.Data;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +22,8 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<RelevanceSiteStudyProject.Core.Interfaces.IPostService, RelevanceSiteStudyProject.Services.Services.PostService>();
+builder.Services.AddScoped<IJWTTokenService, JWTTokenService>();
+
 
 builder.Services.AddLogging(config =>
 {
@@ -73,6 +73,7 @@ var app = builder.Build();
 app.MapDefaultEndpoints();
 
 app.UseAuthentication();
+app.UseMiddleware<JwtMiddleware>();
 app.UseAuthorization();
 
 // Map routes to PostService
@@ -84,33 +85,13 @@ app.MapPut("/posts/{id}", async (
     int id,
     PostDto post) =>
 {
-
-    var authHeader = context.Request.Headers["Authorization"].ToString();
-    if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+    var user = context.User;
+    if (user.Identity is not { IsAuthenticated: true })
     {
         return Results.Unauthorized();
     }
 
-    var token = authHeader["Bearer ".Length..].Trim();
-
-    var userPrincipal = ValidateJwtToken(token, config);
-    if (userPrincipal == null)
-    {
-        return Results.Unauthorized();
-    }
-
-    var userId = userPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-    //// Ensure token is valid (auth is required)
-    //var user = context.User;
-    //if (user.Identity is not { IsAuthenticated: true })
-    //{
-    //    return Results.Unauthorized();
-    //}
-
-    //// Extract user info from token (e.g., sub, nameidentifier)
-    //string userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    //var isAdmin = user.IsInRole("Admin");
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
     if (string.IsNullOrEmpty(userId))
     {
@@ -137,36 +118,12 @@ app.MapPut("/posts/{id}", async (
     }
 
 
-    ClaimsPrincipal? ValidateJwtToken(string token, IConfiguration config)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]);
 
-        try
-        {
-            var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = config["Jwt:Issuer"],
-                ValidAudience = config["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(key)
-            }, out SecurityToken validatedToken);
-
-            return principal;
-        }
-        catch
-        {
-            return null;
-        }
-    }
 });
 //app.MapDelete("/posts/{id}", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, int id) => await postService.Delete(id));
 
 
-app.MapPost("/login", async (LoginDto login, UserManager<User> userManager, IConfiguration config) =>
+app.MapPost("/login", async (LoginDto login, UserManager<User> userManager, IJWTTokenService jwtTokenService, IConfiguration config) =>
 {
     var user = await userManager.FindByEmailAsync(login.Email);
     if (user == null || !await userManager.CheckPasswordAsync(user, login.Password))
@@ -174,72 +131,16 @@ app.MapPost("/login", async (LoginDto login, UserManager<User> userManager, ICon
         return Results.Unauthorized();
     }
 
-    var claims = new[]
-    {
-        new Claim(ClaimTypes.NameIdentifier, user.Id),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Name, user.UserName)
-    };
+    var tokenString = jwtTokenService.GenerateJwtToken(user);
 
-    var tokenString = GenerateJwtToken(user, config);
-
-    var validationResult = ValidateJwtToken(tokenString, config);
+    // Validate the token immediately after generation
+    var validationResult = jwtTokenService.ValidateJwtToken(tokenString);
     if (validationResult == null)
     {
         return Results.Problem("Token validation failed immediately after generation.");
     }
 
     return Results.Ok(tokenString);
-
-    //TODO: Move this method to a separate class or service for better organization
-    string GenerateJwtToken(User user, IConfiguration config)
-    {
-        var claims = new[]
-        {
-        new Claim(ClaimTypes.NameIdentifier, user.Id),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Name, user.UserName)
-    };
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: config["Jwt:Issuer"],
-            audience: config["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
-            signingCredentials: creds);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-
-    ClaimsPrincipal? ValidateJwtToken(string token, IConfiguration config)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]);
-
-        try
-        {
-            var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = config["Jwt:Issuer"],
-                ValidAudience = config["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(key)
-            }, out SecurityToken validatedToken);
-
-            return principal;
-        }
-        catch
-        {
-            return null;
-        }
-    }
 });
 
 
