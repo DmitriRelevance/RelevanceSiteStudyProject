@@ -24,6 +24,8 @@ namespace RelevanceSiteStudyProject.Services
 
         public async Task<PostDto?> AddPostAsync(PostCreateDto postToCreate)
         {
+            await SetAuthorizationHeaderAsync();
+
             var content = new StringContent(JsonSerializer.Serialize(postToCreate), Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync($"posts", content);

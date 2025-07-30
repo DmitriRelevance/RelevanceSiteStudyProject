@@ -49,7 +49,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = config["Jwt:Issuer"],
             ValidAudience = config["Jwt:Audience"],
-            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(config["Jwt:Key"]))
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(config["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key")))
         };
 
 
@@ -78,8 +78,51 @@ app.UseMiddleware<JwtMiddleware>();
 app.UseAuthorization();
 
 // Map routes to PostService
-app.MapGet("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService) => await postService.GetPosts());
-app.MapPost("/posts", async (RelevanceSiteStudyProject.Core.Interfaces.IPostService postService, PostCreateDto post) => await postService.Add(post));
+app.MapGet("/posts", async (IPostService postService) => await postService.GetPosts());
+app.MapPost("/posts", async (
+    HttpContext context,
+    IPostService postService,
+    PostCreateDto post) =>
+{
+    var user = context.User;
+    if (user.Identity is not { IsAuthenticated: true })
+    {
+        return Results.Unauthorized();
+    }
+
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Results.Unauthorized();
+    }
+
+    if(userId.Equals(post.UserId, StringComparison.OrdinalIgnoreCase) is false)
+    {
+        // User is trying to create a post with a different userId than their own
+        return Results.Forbid();
+    }
+
+    try
+    {
+        var addedPost = await postService.Add(post);
+        return Results.Ok(addedPost);
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+        return Results.Forbid();
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return Results.NotFound(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
+
+});
+
 app.MapPut("/posts/{id}", async (
     HttpContext context,
     IPostService postService,
@@ -120,7 +163,7 @@ app.MapPut("/posts/{id}", async (
 app.MapDelete("/posts/{id}", async (
     HttpContext context,
     IPostService postService,
-    int id) => 
+    int id) =>
 {
     var user = context.User;
     if (user.Identity is not { IsAuthenticated: true })
@@ -135,9 +178,25 @@ app.MapDelete("/posts/{id}", async (
         return Results.Unauthorized();
     }
 
-    await postService.Delete(id, userId);
-    return Results.NoContent();
+    try
+    {
+        await postService.Delete(id, userId);
+        return Results.NoContent();
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+        return Results.Forbid();
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return Results.NotFound(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
 });
+
 
 
 app.MapPost("/login", async (LoginDto login, UserManager<User> userManager, IJWTTokenService jwtTokenService, IConfiguration config) =>
