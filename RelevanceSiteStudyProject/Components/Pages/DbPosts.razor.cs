@@ -1,5 +1,7 @@
 ﻿using RelevanceSiteStudyProject.Core.DTOs;
 using RelevanceSiteStudyProject.ViewModels;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using static RelevanceSiteStudyProject.Components.Pages.Notification;
 
 namespace RelevanceSiteStudyProject.Components.Pages
@@ -134,7 +136,8 @@ namespace RelevanceSiteStudyProject.Components.Pages
 
             try
             {
-                await _postService.Update(postToEdit, currentUser);
+                await _postApiClient.UpdatePostAsync(postToEdit);
+
                 requiresPostUpdate = true;
                 isEditing = false;
                 postToEdit = null;

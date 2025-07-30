@@ -1,12 +1,26 @@
 ﻿@RelevanceSiteStudyProject.API_HostAddress = https://localhost:7171
 
 
-POST {{RelevanceSiteStudyProject.API_HostAddress}}/posts
+GET {{RelevanceSiteStudyProject.API_HostAddress}}/posts
 Content-Type: application/json
 
 {
   "Title": "checkPost",
   "Content": "checkContent"
+}
+
+###
+
+@id=7
+PUT {{RelevanceSiteStudyProject.API_HostAddress}}/posts/{{id}}
+Content-Type: application/json
+
+{
+  "Id": 7,
+  "Title": "cxbcv",
+  "Content": "ASFS",
+  "UserId": "d36b2bd3-e10a-453c-9f36-350fb1996314",
+  "CategoryId": 1
 }
 
 ###

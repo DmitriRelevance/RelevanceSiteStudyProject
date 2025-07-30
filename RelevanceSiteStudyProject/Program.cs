@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.FluentUI.AspNetCore.Components;
+using RelevanceSiteStudy.Services.Services;
 using RelevanceSiteStudyProject.Components;
 using RelevanceSiteStudyProject.Configuration;
 using RelevanceSiteStudyProject.Core.Entities;
@@ -33,6 +34,12 @@ builder.Services.AddHttpClient<PostApiClient>((sp, client) =>
     client.BaseAddress = new Uri(apiSettings.BaseUrl);
 });
 
+builder.Services.AddHttpClient<LogInApiClient>((sp, client) =>
+{
+    var apiSettings = sp.GetRequiredService<IOptions<ApiSettings>>().Value;
+    client.BaseAddress = new Uri(apiSettings.BaseUrl);
+});
+
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<NotificationService>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -51,6 +58,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
         options.SlidingExpiration = true;
     });
+
+builder.Services.AddScoped<ITokenProvider, LocalStorageTokenProvider>();
 
 builder.Services.AddFluentUIComponents();
 

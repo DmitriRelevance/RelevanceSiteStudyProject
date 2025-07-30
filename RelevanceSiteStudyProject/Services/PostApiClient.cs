@@ -1,4 +1,5 @@
 ﻿using RelevanceSiteStudyProject.Core.DTOs;
+using RelevanceSiteStudyProject.Core.Interfaces;
 using System.Text;
 using System.Text.Json;
 
@@ -7,9 +8,11 @@ namespace RelevanceSiteStudyProject.Services
     public class PostApiClient
     {
         private readonly HttpClient _httpClient;
-        public PostApiClient(HttpClient httpClient)
+        private readonly ITokenProvider _tokenProvider;
+        public PostApiClient(HttpClient httpClient, ITokenProvider tokenProvider)
         {
             _httpClient = httpClient;
+            _tokenProvider = tokenProvider;
         }
 
         public async Task<IList<PostDto>> GetPostsAsync()
@@ -29,6 +32,26 @@ namespace RelevanceSiteStudyProject.Services
                 return await response.Content.ReadFromJsonAsync<PostDto>();
             }
             return null;
+        }
+
+        public async Task UpdatePostAsync(PostDto post)
+        {
+            var token = await _tokenProvider.GetTokenAsync();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedAccessException("No valid token found.");
+            }
+            else
+            {
+                token = token.Trim('"'); // Fix it
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+
+            string serializedJson = JsonSerializer.Serialize(post);
+
+            var content = new StringContent(serializedJson, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"posts/{post.Id}", content);
+            response.EnsureSuccessStatusCode();
         }
     }
 }
