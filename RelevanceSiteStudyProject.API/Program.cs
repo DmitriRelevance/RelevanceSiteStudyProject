@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RelevanceSiteStudyProject.API.Helpers;
 using RelevanceSiteStudyProject.Core.DTOs;
 using RelevanceSiteStudyProject.Core.Entities;
 using RelevanceSiteStudyProject.Core.Interfaces;
 using RelevanceSiteStudyProject.Core.Services;
 using RelevanceSiteStudyProject.Infrasactructure.Data;
 using RelevanceSiteStudyProject.Services.Services;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +15,7 @@ builder.AddServiceDefaults();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Register services
-builder.Services.AddDbContext<RelevanceSiteStudyProject.Infrasactructure.Data.AppDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddIdentity<User, IdentityRole>()
@@ -84,43 +84,23 @@ app.MapPost("/posts", async (
     IPostService postService,
     PostCreateDto post) =>
 {
-    var user = context.User;
-    if (user.Identity is not { IsAuthenticated: true })
-    {
-        return Results.Unauthorized();
-    }
-
-    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
+    string? userId = HttpContextExtensions.TryGetAuthenticatedUserId(context);
     if (string.IsNullOrEmpty(userId))
     {
         return Results.Unauthorized();
     }
 
-    if(userId.Equals(post.UserId, StringComparison.OrdinalIgnoreCase) is false)
+    if (userId.Equals(post.UserId, StringComparison.OrdinalIgnoreCase) is false)
     {
         // User is trying to create a post with a different userId than their own
         return Results.Forbid();
     }
 
-    try
+    return await ServiceCallHandler.HandleActionWithResultAsync(async () =>
     {
         var addedPost = await postService.Add(post);
-        return Results.Ok(addedPost);
-    }
-    catch (UnauthorizedAccessException ex)
-    {
-        return Results.Forbid();
-    }
-    catch (KeyNotFoundException ex)
-    {
-        return Results.NotFound(new { message = ex.Message });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(ex.Message);
-    }
-
+        return addedPost;
+    });
 });
 
 app.MapPut("/posts/{id}", async (
@@ -128,36 +108,21 @@ app.MapPut("/posts/{id}", async (
     IPostService postService,
     PostDto post) =>
 {
-    var user = context.User;
-    if (user.Identity is not { IsAuthenticated: true })
-    {
-        return Results.Unauthorized();
-    }
-
-    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
+    var userId = HttpContextExtensions.TryGetAuthenticatedUserId(context);
     if (string.IsNullOrEmpty(userId))
     {
         return Results.Unauthorized();
     }
 
-    try
+    return await ServiceCallHandler.HandleActionAsync(async () =>
     {
+        if (post.Id <= 0)
+        {
+            throw new ArgumentException("Invalid post ID.");
+        }
         await postService.Update(post, userId);
-        return Results.NoContent();
-    }
-    catch (UnauthorizedAccessException ex)
-    {
-        return Results.Forbid();
-    }
-    catch (KeyNotFoundException ex)
-    {
-        return Results.NotFound(new { message = ex.Message });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(ex.Message);
-    }
+    });
+
 });
 
 app.MapDelete("/posts/{id}", async (
@@ -165,40 +130,19 @@ app.MapDelete("/posts/{id}", async (
     IPostService postService,
     int id) =>
 {
-    var user = context.User;
-    if (user.Identity is not { IsAuthenticated: true })
-    {
-        return Results.Unauthorized();
-    }
-
-    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
+    var userId = HttpContextExtensions.TryGetAuthenticatedUserId(context);
     if (string.IsNullOrEmpty(userId))
     {
         return Results.Unauthorized();
     }
 
-    try
+    return await ServiceCallHandler.HandleActionAsync(async () =>
     {
         await postService.Delete(id, userId);
-        return Results.NoContent();
-    }
-    catch (UnauthorizedAccessException ex)
-    {
-        return Results.Forbid();
-    }
-    catch (KeyNotFoundException ex)
-    {
-        return Results.NotFound(new { message = ex.Message });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(ex.Message);
-    }
+    });
 });
 
-
-
+// Login endpoint
 app.MapPost("/login", async (LoginDto login, UserManager<User> userManager, IJWTTokenService jwtTokenService, IConfiguration config) =>
 {
     var user = await userManager.FindByEmailAsync(login.Email);
@@ -218,6 +162,5 @@ app.MapPost("/login", async (LoginDto login, UserManager<User> userManager, IJWT
 
     return Results.Ok(tokenString);
 });
-
 
 app.Run();
