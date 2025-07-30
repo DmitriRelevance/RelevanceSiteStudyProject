@@ -1,10 +1,15 @@
 ﻿@page "/login"
 @using Microsoft.AspNetCore.Identity
+@using RelevanceSiteStudyProject.Core.DTOs
 @using RelevanceSiteStudyProject.Core.Entities
+@using RelevanceSiteStudyProject.Core.Interfaces
 @rendermode InteractiveServer
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
 @inject NavigationManager Navigation
+@inject HttpClient _httpClient
+@inject ITokenProvider _tokenProvider
+@inject LogInApiClient _logInApiClient
 
 <h3>Login form</h3>
 
@@ -28,22 +33,31 @@
     private LoginModel loginModel = new LoginModel();
     private async Task HandleLogin()
     {
-        var user = await UserManager.FindByEmailAsync(loginModel.Email);
-        if (user == null)
+        try
         {
-            Console.WriteLine("User not found");
+            var loginDto = new LoginDto
+            {
+                Email = loginModel.Email,
+                Password = loginModel.Password
+            };
+
+            var logInResult = await _logInApiClient.LogInAsync(loginDto);
+            if (!string.IsNullOrWhiteSpace(logInResult))
+            {
+                Navigation.NavigateTo($"/signin-handler?email={Uri.EscapeDataString(loginModel.Email)}", true);
+                await _tokenProvider.SetTokenAsync(logInResult);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                Console.WriteLine("Login failed");
+            }
             return;
         }
-
-        var result = await SignInManager.CheckPasswordSignInAsync(user, loginModel.Password, lockoutOnFailure: false);
-        if (result.Succeeded)
+        catch (Exception EX)
         {
-            // Redirect to handler that performs the actual sign-in
-            Navigation.NavigateTo($"/signin-handler?email={Uri.EscapeDataString(loginModel.Email)}", true);
-        }
-        else
-        {
-            Console.WriteLine("Login failed");
+            Console.WriteLine(EX.Message);
+            throw;
         }
     }
 
