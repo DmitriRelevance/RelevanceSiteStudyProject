@@ -67,7 +67,7 @@ namespace RelevanceSiteStudyProject.Tests.Services
         {
             _postRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((Post?)null);
 
-            var dto = new PostDto { Id = 1, Title = "Updated", Content = "Updated" };
+            var dto = new PostUpdateDto { Id = 1, Title = "Updated", Content = "Updated" };
 
             await Assert.ThrowsAsync<KeyNotFoundException>(() => _postService.Update(dto, "user1"));
         }
@@ -79,7 +79,7 @@ namespace RelevanceSiteStudyProject.Tests.Services
             _postRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(post);
             _userManagerMock.Setup(um => um.FindByIdAsync("user1")).ReturnsAsync((User?)null);
 
-            var dto = new PostDto { Id = 1, Title = "Updated", Content = "Updated" };
+            var dto = new PostUpdateDto { Title = "Updated", Content = "Updated" };
 
             await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _postService.Update(dto, "user1"));
         }
@@ -94,7 +94,7 @@ namespace RelevanceSiteStudyProject.Tests.Services
             _userManagerMock.Setup(um => um.FindByIdAsync("user1")).ReturnsAsync(user);
             _userManagerMock.Setup(um => um.IsInRoleAsync(user, "Admin")).ReturnsAsync(false);
 
-            var dto = new PostDto { Id = 1, Title = "Updated", Content = "Updated" };
+            var dto = new PostUpdateDto { Id = 1, Title = "Updated", Content = "Updated" };
 
             await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _postService.Update(dto, "user1"));
         }
@@ -109,7 +109,7 @@ namespace RelevanceSiteStudyProject.Tests.Services
             _userManagerMock.Setup(um => um.FindByIdAsync("user1")).ReturnsAsync(user);
             _userManagerMock.Setup(um => um.IsInRoleAsync(user, "Admin")).ReturnsAsync(false);
 
-            var dto = new PostDto { Id = 1, Title = "Updated", Content = "Updated" };
+            var dto = new PostUpdateDto { Id = 1, Title = "Updated", Content = "Updated" };
 
             await _postService.Update(dto, "user1");
 
@@ -165,7 +165,7 @@ namespace RelevanceSiteStudyProject.Tests.Services
         {
             var store = new Mock<IUserStore<TUser>>();
             return new Mock<UserManager<TUser>>(
-                store.Object, null, null, null, null, null, null, null, null);
+                store.Object);
         }
     }
 

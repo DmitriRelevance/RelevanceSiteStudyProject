@@ -62,7 +62,7 @@ namespace RelevanceSiteStudyProject.Services.Services
               return result;
         }
 
-        public async Task Update(PostDto dto, string userId)
+        public async Task Update(PostUpdateDto dto, string userId)
         {
             var existing = await _postRepository.GetByIdAsync(dto.Id);
             if (existing is null)

@@ -114,7 +114,7 @@ app.MapPost("/posts", async (
 app.MapPut("/posts/{id}", async (
     HttpContext context,
     IPostService postService,
-    PostDto post) =>
+    PostUpdateDto post) =>
 {
     var userId = HttpContextExtensions.TryGetAuthenticatedUserId(context);
     if (string.IsNullOrEmpty(userId))
