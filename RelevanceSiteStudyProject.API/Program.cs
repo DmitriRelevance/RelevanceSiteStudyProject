@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RelevanceSiteStudy.Services.Repositories;
 using RelevanceSiteStudyProject.API.ExceptionHandlers;
 using RelevanceSiteStudyProject.API.Helpers;
 using RelevanceSiteStudyProject.Core.DTOs;
@@ -23,6 +24,7 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IJWTTokenService, JWTTokenService>();
 

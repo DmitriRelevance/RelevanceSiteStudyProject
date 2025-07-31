@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RelevanceSiteStudyProject.Core.DTOs;
 using RelevanceSiteStudyProject.Core.Entities;
@@ -10,11 +9,13 @@ namespace RelevanceSiteStudyProject.Services.Services
 {
     public class PostService : IPostService
     {
+        private readonly IPostRepository _postRepository;
         private readonly RelevanceSiteStudyProject.Infrasactructure.Data.AppDbContext _context;
         private readonly ILogger<PostService> _logger;
         private readonly UserManager<User> _userManager;
-        public PostService(RelevanceSiteStudyProject.Infrasactructure.Data.AppDbContext context, ILogger<PostService> logger, UserManager<User> userManager)
+        public PostService(IPostRepository postRepository, RelevanceSiteStudyProject.Infrasactructure.Data.AppDbContext context, ILogger<PostService> logger, UserManager<User> userManager)
         {
+            _postRepository = postRepository;
             _context = context;
             _logger = logger;
             _userManager = userManager;
@@ -26,9 +27,8 @@ namespace RelevanceSiteStudyProject.Services.Services
             {
                 var postEntity = PostMapper.ToEntity(post);
 
-                var addedPost  = _context.Posts.Add(postEntity);
-                await _context.SaveChangesAsync();
-                var dtoResult = PostMapper.ToDto(addedPost.Entity);
+                var addedPost  = await _postRepository.AddAsync(postEntity);
+                var dtoResult = PostMapper.ToDto(addedPost);
 
                 return dtoResult;
             }
@@ -48,14 +48,14 @@ namespace RelevanceSiteStudyProject.Services.Services
         }
         public async Task<IList<PostDto>> GetPosts()
          {
-            var dbPosts = await _context.Posts.ToListAsync();
+            var dbPosts = await _postRepository.GetAllAsync();
             var result = PostMapper.ToDto<Post, PostDto>(dbPosts, p => p.ToDto());
               return result;
         }
 
         public async Task Update(PostDto dto, string userId)
         {
-            var existing = await _context.Posts.FirstOrDefaultAsync(p => p.Id == dto.Id);
+            var existing = await _postRepository.GetByIdAsync(dto.Id);
             if (existing is null)
                 throw new KeyNotFoundException("Couldn't find your post!");
 
@@ -69,7 +69,7 @@ namespace RelevanceSiteStudyProject.Services.Services
             {
                 existing.Title = dto.Title;
                 existing.Content = dto.Content;
-                await _context.SaveChangesAsync();
+                await _postRepository.UpdateAsync(existing);
             }
             else
             {
@@ -78,7 +78,7 @@ namespace RelevanceSiteStudyProject.Services.Services
         }
         public async Task Delete(int postId, string userId)
         {
-            var existingPost = await _context.Posts.FindAsync(postId);
+            var existingPost = await _postRepository.GetByIdAsync(postId);
             if (existingPost is null)
             {
                 throw new KeyNotFoundException("Post not found");
@@ -90,8 +90,7 @@ namespace RelevanceSiteStudyProject.Services.Services
 
             if (user != null && (existingPost.UserId.Equals(user.Id) || user.IsAdmin))
             {
-                _context.Posts.Remove(existingPost);
-                await _context.SaveChangesAsync();
+                await _postRepository.DeleteAsync(existingPost);
             }
             else
             {

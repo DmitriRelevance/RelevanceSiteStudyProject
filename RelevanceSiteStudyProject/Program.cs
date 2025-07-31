@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.FluentUI.AspNetCore.Components;
+using RelevanceSiteStudy.Services.Repositories;
 using RelevanceSiteStudy.Services.Services;
 using RelevanceSiteStudyProject.Components;
 using RelevanceSiteStudyProject.Configuration;
@@ -40,6 +41,7 @@ builder.Services.AddHttpClient<LogInApiClient>((sp, client) =>
     client.BaseAddress = new Uri(apiSettings.BaseUrl);
 });
 
+builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<NotificationService>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
