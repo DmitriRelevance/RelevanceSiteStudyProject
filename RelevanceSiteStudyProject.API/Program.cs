@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RelevanceSiteStudy.Services.Repositories;
 using RelevanceSiteStudyProject.API.ExceptionHandlers;
+using RelevanceSiteStudyProject.API.Filters;
 using RelevanceSiteStudyProject.API.Helpers;
 using RelevanceSiteStudyProject.Core.DTOs;
 using RelevanceSiteStudyProject.Core.Entities;
@@ -124,14 +125,9 @@ app.MapPut("/posts/{id}", async (
 
     return await ServiceCallHandler.HandleActionAsync(async () =>
     {
-        if (post.Id <= 0)
-        {
-            throw new ArgumentException("Invalid post ID.");
-        }
         await postService.Update(post, userId);
     });
-
-});
+}).AddEndpointFilter<ValidationFilter<PostUpdateDto>>();
 
 app.MapDelete("/posts/{id}", async (
     HttpContext context,
