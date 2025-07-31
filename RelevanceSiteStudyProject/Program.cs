@@ -41,8 +41,10 @@ builder.Services.AddHttpClient<LogInApiClient>((sp, client) =>
     client.BaseAddress = new Uri(apiSettings.BaseUrl);
 });
 
+builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostService, PostService>();
+
 builder.Services.AddScoped<NotificationService>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>

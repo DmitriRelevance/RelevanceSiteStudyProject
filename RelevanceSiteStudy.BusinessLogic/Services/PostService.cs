@@ -10,13 +10,13 @@ namespace RelevanceSiteStudyProject.Services.Services
     public class PostService : IPostService
     {
         private readonly IPostRepository _postRepository;
-        private readonly RelevanceSiteStudyProject.Infrasactructure.Data.AppDbContext _context;
+        private readonly ILogRepository _logRepository;
         private readonly ILogger<PostService> _logger;
         private readonly UserManager<User> _userManager;
-        public PostService(IPostRepository postRepository, RelevanceSiteStudyProject.Infrasactructure.Data.AppDbContext context, ILogger<PostService> logger, UserManager<User> userManager)
+        public PostService(IPostRepository postRepository, ILogRepository logRepository, ILogger<PostService> logger, UserManager<User> userManager)
         {
             _postRepository = postRepository;
-            _context = context;
+            _logRepository = logRepository;
             _logger = logger;
             _userManager = userManager;
         }
@@ -35,13 +35,22 @@ namespace RelevanceSiteStudyProject.Services.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Error adding post: {ex.Message}");
-                _context.LogEntries.Add(new LogEntry
+
+                try
                 {
-                    Message = $"Error adding post: {ex.Message}",
-                    StackTrace = ex?.StackTrace ?? string.Empty,
-                    Timestamp = DateTime.UtcNow,
-                    Action = nameof(Add),
-                });
+                    await _logRepository.LogAsync(new LogEntry
+                    {
+                        Message = $"Error adding post: {ex.Message}",
+                        StackTrace = ex.StackTrace ?? string.Empty,
+                        Timestamp = DateTime.UtcNow,
+                        Action = nameof(Add)
+                    });
+                }
+                catch (Exception logEx)
+                {
+                    _logger.LogError(logEx, "Failed to write log entry to database");
+                }
+
                 throw;
             }
 

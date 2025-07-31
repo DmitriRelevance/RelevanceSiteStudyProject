@@ -24,6 +24,7 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IJWTTokenService, JWTTokenService>();
