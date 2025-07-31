@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RelevanceSiteStudyProject.API.ExceptionHandlers;
 using RelevanceSiteStudyProject.API.Helpers;
 using RelevanceSiteStudyProject.Core.DTOs;
 using RelevanceSiteStudyProject.Core.Entities;
@@ -37,6 +38,8 @@ var config = builder.Configuration;
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -76,6 +79,8 @@ app.MapDefaultEndpoints();
 app.UseAuthentication();
 app.UseMiddleware<JwtMiddleware>();
 app.UseAuthorization();
+
+app.UseExceptionHandler();
 
 // Map routes to PostService
 app.MapGet("/posts", async (IPostService postService) => await postService.GetPosts());

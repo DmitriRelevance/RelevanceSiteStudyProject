@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelevanceSiteStudyProject.A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelevanceSiteStudyProject.ServiceDefaults", "RelevanceSiteStudyProject.ServiceDefaults\RelevanceSiteStudyProject.ServiceDefaults.csproj", "{86CDBD4F-F0BF-2DCC-7D10-B0D3E6EFDF78}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIIdentityTemplate", "APIIdentityTemplate\APIIdentityTemplate.csproj", "{C085A0E3-B698-600C-3DD8-98CA5945A872}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{86CDBD4F-F0BF-2DCC-7D10-B0D3E6EFDF78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86CDBD4F-F0BF-2DCC-7D10-B0D3E6EFDF78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86CDBD4F-F0BF-2DCC-7D10-B0D3E6EFDF78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C085A0E3-B698-600C-3DD8-98CA5945A872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C085A0E3-B698-600C-3DD8-98CA5945A872}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C085A0E3-B698-600C-3DD8-98CA5945A872}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C085A0E3-B698-600C-3DD8-98CA5945A872}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
